@@ -1,0 +1,27 @@
+# Bỏ thư mục build và cache
+dist
+node_modules
+.cache
+
+# Bỏ các file cấu hình local, môi trường
+.env
+.env.*
+firebase-admin-key.json
+
+# IDE/editor
+.vscode
+.idea
+*.swp
+
+# Git
+.git
+.gitignore
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db
+
+# Log, test, misc
+*.log
+coverage
+*.test.ts
