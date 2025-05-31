@@ -59,7 +59,7 @@ export class SearchVideoService implements OnApplicationBootstrap {
         });
     }
 
-    async searchAdvanced(q: string) {
+    async searchAdvanced(q: string, page = 1, limit = 2) {
         const isNumber = /^\d+$/.test(q); // kiểm tra nếu là số (để match id)
 
         const query: any = {
@@ -94,12 +94,17 @@ export class SearchVideoService implements OnApplicationBootstrap {
             });
         }
 
+        const from = (page - 1) * limit;
         const result = await this.searchService.search({
             index: 'videos',
             query,
+            from,
+            size: limit,
         });
 
-        return result.hits.hits.map((hit) => hit._source);
+        const total = typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value || 0;
+        const data = result.hits.hits.map((hit) => hit._source);
+        return { data, total, page, limit };
     }
 
     // Đếm tổng document trong ES

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Setting } from './entities/setting.entity';
@@ -13,12 +13,20 @@ export class SettingService {
     ) { }
 
     async create(dto: CreateSettingDto): Promise<Setting> {
+        const check = await this.settingRepository.findOne({ where: { keys: dto.keys } });
+        if (check) {
+            throw new HttpException('Setting already exists', HttpStatus.BAD_REQUEST);
+        }
         const setting = this.settingRepository.create(dto);
         return this.settingRepository.save(setting);
     }
 
     async findByKey(key: string): Promise<Setting | null> {
-        return this.settingRepository.findOne({ where: { keys: key } });
+        const check = await this.settingRepository.findOne({ where: { keys: key } });
+        if (!check) {
+            throw new HttpException('Setting not found', HttpStatus.NOT_FOUND);
+        }
+        return check;
     }
 
     async findAll(): Promise<Setting[]> {

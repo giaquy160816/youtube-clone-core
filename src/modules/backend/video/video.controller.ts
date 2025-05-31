@@ -12,14 +12,12 @@ import {
     BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Public } from 'src/decorators/public.decorator';
 import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { VideoService } from './video.service';
 import { VideoUploadService } from './video-upload.service';
 
 @Controller()
-@Public()
 export class VideoController {
     constructor(
         private readonly videoService: VideoService,
@@ -46,13 +44,17 @@ export class VideoController {
 
     // tìm kiếm video
     @Get('search')
-    search(@Query('q') q: string) {
-        return this.videoService.searchVideos(q);
+    search(
+        @Query('q') q: string,
+        @Query('page') page: number = 1,
+        @Query('limit') limit: number = 2,
+    ) {
+        return this.videoService.searchVideos(q, Number(page), Number(limit));
     }
 
     @Get()
-    findAll() {
-        return this.videoService.findAll();
+    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 2) {
+        return this.videoService.findAll(Number(page), Number(limit));
     }
 
     @Delete(':id')

@@ -1,10 +1,8 @@
 import { BadRequestException, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { CommonService } from './common.service';
-import { Public } from 'src/decorators/public.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller()
-@Public()
 export class CommonController {
     constructor(private readonly commonService: CommonService) { }
 

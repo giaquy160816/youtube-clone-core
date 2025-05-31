@@ -139,12 +139,9 @@ export class AuthService {
         try {
 
             const decoded = await adminGG.auth().verifyIdToken(token);
-
-            const users = await adminGG.auth().listUsers();
-            console.log('users', users);
+            console.log('decoded', decoded);
             return {
                 message: 'Token is valid',
-                data: users
             };
         } catch (err) {
             throw new BadRequestException('Invalid token');

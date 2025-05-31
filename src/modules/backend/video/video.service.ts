@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { Public } from 'src/decorators/public.decorator';
 import { ClientProxy } from '@nestjs/microservices';
 import { Video } from './entities/video.entity';
 import { SearchVideoService } from './video-search.service';
@@ -9,7 +8,6 @@ import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 
 @Injectable()
-@Public()
 export class VideoService {
     constructor(
         @InjectRepository(Video)
@@ -76,12 +74,16 @@ export class VideoService {
     }
 
     
-    async searchVideos(q: string) {
-        return this.SearchVideoService.searchAdvanced(q);
+    async searchVideos(q: string, page = 1, limit = 2) {
+        return this.SearchVideoService.searchAdvanced(q, page, limit);
     }
 
-    async findAll(): Promise<Video[]> {
-        return this.videoRepository.find();
+    async findAll(page = 1, limit = 2): Promise<{ data: Video[]; total: number; page: number; limit: number }> {
+        const [data, total] = await this.videoRepository.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+        return { data, total, page, limit };
     }
 
     async delete(id: number): Promise<void> {

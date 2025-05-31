@@ -2,10 +2,8 @@ import { Controller, Get, Post, Body, Put, Param } from '@nestjs/common';
 import { SettingService } from './setting.service';
 import { CreateSettingDto } from './dto/create-setting.dto';
 import { UpdateSettingDto } from './dto/update-setting.dto';
-import { Public } from 'src/decorators/public.decorator';
 
 @Controller()
-@Public()
 export class SettingController {
     constructor(private readonly settingService: SettingService) { }
 
@@ -17,6 +15,11 @@ export class SettingController {
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.settingService.findOne(+id);
+    }
+
+    @Get('key/:key')
+    findByKey(@Param('key') key: string) {
+        return this.settingService.findByKey(key);
     }
 
     @Get()

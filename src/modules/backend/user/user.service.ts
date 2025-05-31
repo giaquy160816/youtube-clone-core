@@ -19,11 +19,6 @@ export class UserService {
         private readonly redisService: RedisService
     ) { }
 
-    async create(createUserDto: CreateUserDto): Promise<User> {
-        const user = this.userRepository.create(createUserDto);
-        return this.userRepository.save(user);
-    }
-
     async find(): Promise<User[]> {
         return this.userRepository.find();
     }
@@ -33,11 +28,9 @@ export class UserService {
             const cachedUsers = await this.redisService.getJson<User[]>('users');
 
             if (cachedUsers) {
-                console.log('From Redis');
                 return cachedUsers;
             }
 
-            console.log('From Database');
             const users = await this.userRepository.createQueryBuilder('user')
                 .select(['user.id', 'user.fullname', 'user.email'])
                 .getMany();
@@ -46,7 +39,6 @@ export class UserService {
             return users;
 
         } catch (error) {
-            console.error('Error finding all users:', error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -86,29 +78,4 @@ export class UserService {
         return this.userRepository.save({ ...user, ...updateUserDto });
     }
 
-    async remove(id: string): Promise<{ message: string }> {
-        try {
-            const entityManager = this.userRepository.manager;
-
-            const user = await this.userRepository.findOne({
-                where: { id: Number(id) },
-            });
-
-            if (!user) {
-                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-            }
-
-            return { message: 'User and profile deleted successfully' };
-
-        } catch (error) {
-            console.error('Error removing user:', error);
-            if (error instanceof HttpException) {
-                throw error;
-            }
-            throw new HttpException(
-                'Failed to remove user',
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-    }
 }
