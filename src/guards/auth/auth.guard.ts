@@ -1,11 +1,12 @@
 import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
 import { IS_PUBLIC_KEY } from 'src/common/constants/meta-keys';
 import { extractTokenFromHeader } from 'src/utils/token/extractToken.utils';
 import configuration from 'src/config/configuration';
 import { decryptPayload } from 'src/utils/token/jwt-encrypt.utils';
+import { sendDiscordNotification } from 'src/utils/notification/discord.service';
+
 
 
 @Injectable()
@@ -27,6 +28,17 @@ export class AuthGuard implements CanActivate {
         const token = extractTokenFromHeader(request);
 
         if (!token){
+            // send discord notification
+            await sendDiscordNotification({
+                level: 'error',
+                title: '🚨 Auth Guard Error',
+                fields: {
+                    'Error': 'No token provided',
+                    'Time': new Date().toISOString(),
+                },
+            });
+            // send discord notification
+
             throw new HttpException('No token provided', HttpStatus.UNAUTHORIZED);
         }
 
@@ -42,6 +54,17 @@ export class AuthGuard implements CanActivate {
             request.user = dataPayload; // Gắn vào request
             return true;
         } catch (error) {
+            // send discord notification
+            await sendDiscordNotification({
+                level: 'error',
+                title: '🚨 Auth Guard Error',
+                fields: {
+                    'Error': error.message,
+                    'Time': new Date().toISOString(),
+                },
+            });
+            // send discord notification
+
             // Handle JWT-specific errors
             switch (error.name) {
                 case 'TokenExpiredError':

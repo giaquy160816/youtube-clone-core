@@ -2,18 +2,23 @@
 import { APP_GUARD } from '@nestjs/core';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RouterModule } from '@nestjs/core';
 import { CacheModule } from '@nestjs/cache-manager';
 
 // Libaries Third Party
-import { initializeApp } from 'firebase-admin/app';
-import { credential } from 'firebase-admin';
+import { initializeApp } from 'firebase-admin/app'; // kết nối firebase
+import { credential } from 'firebase-admin'; // kết nối firebase
+import { createKeyv } from '@keyv/redis'; // kết nối redis
+import { rabbitMqConfig } from './service/rabbitMQ/rabbitmq.config'; // kết nối rabbitmq
+import { SupabaseService } from './service/supabase/supabase.service'; // kết nối supabase
 
 
-import configuration from './config/configuration';
+// Config
+import configuration from './config/configuration'; // config
 
+// Database
 //datasource
 import PostgresDataSource from './datasources/postgres.datasource';
 import MysqlDataSource from './datasources/mysql.datasource';
@@ -34,15 +39,12 @@ import { backendRoutes, backendModules } from './routes/backend.routes';
 import { AuthGuard } from './guards/auth/auth.guard';
 import { DatabaseTokenGuard } from './guards/auth/database-token.guard';
 import { RolesGuard } from 'src/guards/auth/roles.guard';
-import { createKeyv } from '@keyv/redis';
 import { SearchService } from './service/elasticsearch/search.service';
+import { CustomThrottlerGuard } from './guards/other/custom-throttler.guard';
 
 import { DatabaseService } from './database/database.service';
 import { AccessToken } from './modules/backend/auth/entities/access-token.entity';
 import { ClientsModule } from '@nestjs/microservices';
-
-import { rabbitMqConfig } from './service/rabbitMQ/rabbitmq.config';
-import { SupabaseService } from './service/supabase/supabase.service';
 
 @Module({
     imports: [
@@ -51,7 +53,15 @@ import { SupabaseService } from './service/supabase/supabase.service';
             envFilePath: ['.env'],
             load: [configuration],
         }),
-
+        ThrottlerModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService): ThrottlerModuleOptions => ({
+                throttlers: [{
+                    ttl: (configService.get<number>('rateLimit.ttl') ?? 60) * 1000, // Convert seconds to milliseconds
+                    limit: configService.get<number>('rateLimit.limit') ?? 2,
+                }]
+            }),
+        }),
         CustomElasticsearchModule,
         RouterModule.register([
             ...frontendRoutes,
@@ -71,28 +81,7 @@ import { SupabaseService } from './service/supabase/supabase.service';
                 }
             },
         }),
-        /*
-        TypeOrmModule.forRootAsync({
-            name: 'mysqlConnection',
-            inject: [ConfigService],
-            useFactory: () => {
-                return {
-                    ...MysqlDataSource.options,
-                    autoLoadEntities: true,
-                    synchronize: true,
-                }
-            },
-        }),
-        */
-        // AuthModule is imported first to make JwtService available to other modules
-        ThrottlerModule.forRoot({
-            throttlers: [
-                {
-                    ttl: 60000,
-                    limit: 10,
-                },
-            ],
-        }),
+
         CacheModule.registerAsync({
             isGlobal: true,
             inject: [ConfigService],
@@ -113,14 +102,14 @@ import { SupabaseService } from './service/supabase/supabase.service';
     ],
     controllers: [],
     providers: [
-        { provide: APP_GUARD, useClass: ThrottlerGuard },  //giới hạn số lần gọi API
+        { provide: APP_GUARD, useClass: CustomThrottlerGuard },  //giới hạn số lần gọi API
         { provide: APP_GUARD, useClass: AuthGuard }, // check token jwt
         { provide: APP_GUARD, useClass: DatabaseTokenGuard }, // check token from database
-        { provide: APP_GUARD, useClass: RolesGuard },
+        { provide: APP_GUARD, useClass: RolesGuard }, // check quyền truy cập
         SearchService,
-        SupabaseService, // check role
-        // DatabaseService, // chỉ dùng khi chạy sv lần đầu xoá hết table tạo lại
-    ],
+        SupabaseService, // kết nối supabase
+        // DatabaseService, // tạo trigger trong database ( Auth - User table ) chỉ dùng khi chạy sv lần đầu xoá hết table tạo lại
+    ]
 })
 export class AppModule implements NestModule {
     constructor() {
@@ -132,9 +121,9 @@ export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
         consumer
             .apply(
-                IpWhitelistMiddleware,
-                RequestTimingMiddleware,
-                SanitizeInputMiddleware
+                RequestTimingMiddleware,  // request timing ( cảnh báo khi thời gian truy cập qúa lâu)
+                IpWhitelistMiddleware,    // ip whitelist ( chỉ cho phép những ip này có quyền truy cập )
+                SanitizeInputMiddleware    // sanitize input ( xóa các ký tự đặc biệt trong input )
             )
             .forRoutes('*');
     }

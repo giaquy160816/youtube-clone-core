@@ -1,8 +1,8 @@
 import { Injectable, NestMiddleware, ForbiddenException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { SettingService } from 'src/modules/backend/setting/setting.service';
-// import { sendErrorEmail } from 'src/utils/noti/email-error.util'; // Nếu muôn gửi mail lỗi thì bật lên
-import { sendDiscordNotification } from 'src/utils/noti/discord-notify.util';
+// import { sendErrorEmail } from 'src/utils/notification/email.service'; // Nếu muôn gửi mail lỗi thì bật lên
+import { sendDiscordNotification } from 'src/utils/notification/discord.service';
 
 
 @Injectable()
@@ -32,8 +32,18 @@ export class IpWhitelistMiddleware implements NestMiddleware {
 
             if (!whitelist.includes(ip)) {
                 // await sendErrorEmail('IP bị chặn', `IP ${ip} bị từ chối truy cập vào hệ thống tại ${new Date().toISOString()}`); // Nếu muôn gửi mail lỗi thì bật lên
-                await sendDiscordNotification(`IP ${ip} bị từ chối truy cập vào hệ thống tại ${new Date().toISOString()}`);
-                
+
+                // send discord notification
+                await sendDiscordNotification({
+                    level: 'error',
+                    title: '🚨 Middleware IP Blocked',
+                    fields: {
+                        'Reason': 'Not in whitelist',
+                        'Time': new Date().toISOString(),
+                    },
+                });
+                // send discord notification
+
                 return res.status(403).json({
                     statusCode: 403,
                     message: `You are not allowed to access this resource`,

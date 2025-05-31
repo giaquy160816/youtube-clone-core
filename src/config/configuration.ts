@@ -1,9 +1,7 @@
 import * as dotenv from 'dotenv';
-
 dotenv.config();
 
 export default () => {
-    console.log('DB_POSTGRES_HOST:', process.env.DB_POSTGRES_HOST);
     return {
         database_postgres: {
             type: process.env.DB_POSTGRES_TYPE || 'postgres',
@@ -42,8 +40,22 @@ export default () => {
             url: process.env.SUPABASE_URL || 'https://azedgbttqsdjnfweduoj.supabase.co',
             anonKey: process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6ZWRnYnR0cXNkam5md2VkdW9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3MDI2MjEsImV4cCI6MjA2MjI3ODYyMX0.qGKtqlJGGwl8R8-FnQ7Iv_iZcx2qMolkjOwaJl6oad8',
         },
+        smtp: {
+            host: process.env.SMTP_HOST,
+            port: parseInt(process.env.SMTP_PORT || '2525', 10),
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+        notify: {
+            errorEmail: process.env.ERROR_NOTIFY_EMAIL,
+            discordWebhook: process.env.DISCORD_WEBHOOK_URL,
+        },
         cors: (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:4000').split(','),
         ipWhitelist: (process.env.IP_WHITELIST || '127.0.0.1,::1,::ffff:127.0.0.1').split(','),
         port: parseInt(process.env.PORT || '3001', 10),
+        rateLimit: {
+            ttl: parseInt(process.env.RATE_LIMIT_TTL || '60', 10),
+            limit: parseInt(process.env.RATE_LIMIT_LIMIT || '2', 10),
+        },
     };
 };
