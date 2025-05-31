@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToMany, JoinTable } from "typeorm";
-import { Photo } from "../../photo/entities/photo.entity";
-import { Auth } from '../../auth/entities/auth.entity';
-import { GroupPermission } from "../../auth/entities/group_permission.entity";
+import { Auth } from 'src/modules/backend/auth/entities/auth.entity';
+import { GroupPermission } from "src/modules/backend/auth/entities/group_permission.entity";
+import { Video } from "src/modules/backend/video/entities/video.entity";
 
 @Entity()
 export class User {
@@ -14,6 +14,12 @@ export class User {
     @Column()
     email: string;
 
+    @Column()
+    phone: string;
+    
+    @Column()
+    avatar: string;
+
     @CreateDateColumn({
         type: 'timestamptz',
     })
@@ -24,9 +30,6 @@ export class User {
     })
     updatedAt: Date;
 
-    @OneToMany(() => Photo, (photo) => photo.user)
-    photos: Photo[];
-
     @OneToOne(() => Auth, (auth) => auth.user, { cascade: true })
     @JoinColumn()
     auth: Auth;
@@ -34,4 +37,7 @@ export class User {
     @ManyToMany(() => GroupPermission, (groupPermission) => groupPermission.users)
     @JoinTable()
     groupPermissions: GroupPermission[];
+
+    @OneToMany(() => Video, (video) => video.user)
+    videos: Video[];
 }

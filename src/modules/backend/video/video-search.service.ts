@@ -2,16 +2,21 @@ import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 
 @Injectable()
-export class SearchProductService implements OnApplicationBootstrap {
+export class SearchVideoService implements OnApplicationBootstrap {
     constructor(private readonly searchService: ElasticsearchService) { }
 
-    // Khi app khởi động
     async onApplicationBootstrap() {
-        const exists = await this.searchService.indices.exists({ index: 'products' });
+        console.log('elasticsearch service is ready');
+    }
+
+    /*
+    // Khi app khởi động se import tất cả video từ DB vào ES
+    async onApplicationBootstrap() {
+        const exists = await this.searchService.indices.exists({ index: 'videos' });
         if (!exists) {
-            await this.searchService.indices.create({ index: 'products' });
+            await this.searchService.indices.create({ index: 'videos' });
             await this.searchService.indices.putMapping({
-                index: 'products',
+                index: 'videos',
                 body: {
                     properties: {
                         id: { type: 'integer' },
@@ -26,21 +31,22 @@ export class SearchProductService implements OnApplicationBootstrap {
                     }
                 }
             });
-            console.log('✅ Index "products" đã được khởi tạo và mapping.');
+            console.log('✅ Index "videos" đã được khởi tạo và mapping.');
         }
     }
+    */
 
 
-    async indexProduct(index: string, document: any) {
-        console.log('indexProduct', index, document);
+    async indexVideo(index: string, document: any) {
+        console.log('indexVideo', index, document);
         return await this.searchService.index({
-            index: 'products',
+            index: 'videos',
             id: document.id.toString(), // ✅ dùng id làm khóa
             document: document,
         });
     }
 
-    async searchProduct(index: string, query: string) {
+    async searchVideo(index: string, query: string) {
         return await this.searchService.search({
             index,
             query: {
@@ -61,7 +67,7 @@ export class SearchProductService implements OnApplicationBootstrap {
                 should: [
                     {
                         match: {
-                            name: {
+                            title: {
                                 query: q,
                                 fuzziness: 'auto',
                             },
@@ -69,7 +75,7 @@ export class SearchProductService implements OnApplicationBootstrap {
                     },
                     {
                         match: {
-                            'categories.name': {
+                            description: {
                                 query: q,
                                 fuzziness: 'auto',
                             },
@@ -89,7 +95,7 @@ export class SearchProductService implements OnApplicationBootstrap {
         }
 
         const result = await this.searchService.search({
-            index: 'products',
+            index: 'videos',
             query,
         });
 
@@ -97,26 +103,25 @@ export class SearchProductService implements OnApplicationBootstrap {
     }
 
     // Đếm tổng document trong ES
-    async countProductsInES(): Promise<number> {
-        const res = await this.searchService.count({ index: 'products' });
+    async countVideosInES(): Promise<number> {
+        const res = await this.searchService.count({ index: 'videos' });
         return res.count;
     }
 
-    async reindexAllProducts(products: any[]) {
-        console.log(`🔄 Đang reindex ${products.length} sản phẩm...`);
+    async reindexAllVideos(videos: any[]) {
+        console.log(`🔄 Đang reindex ${videos.length} video...`);
 
-        for (const product of products) {
-            await this.indexProduct('products', product);
+        for (const video of videos) {
+            await this.indexVideo('videos', video);
         }
-
-        console.log('✅ Hoàn tất reindex toàn bộ sản phẩm.');
+        console.log('✅ Hoàn tất reindex toàn bộ video.');
     }
 
-    async deleteProductFromIndex(productId: number) {
+    async deleteVideoFromIndex(videoId: number) {
         const result = await this.searchService.delete(
             {
-                index: 'products',
-                id: productId.toString(),
+                index: 'videos',
+                id: videoId.toString(),
             },
             {
                 ignore: [404], // ✅ Đặt ở đây!
@@ -124,25 +129,25 @@ export class SearchProductService implements OnApplicationBootstrap {
         );
 
         if (result.result === 'not_found') {
-            return { message: `Product ${productId} was not found in ES.` };
+            return { message: `Video ${videoId} was not found in ES.` };
         }
 
-        return { message: `Product ${productId} deleted from ES.` };
+        return { message: `Video ${videoId} deleted from ES.` };
     }
 
-    async deleteByFieldId(productId: number) {
+    async deleteByFieldId(videoId: number) {
         const result = await this.searchService.deleteByQuery({
-            index: 'products',
+            index: 'videos',
             query: {
                 match: {
-                    id: productId,
+                    id: videoId,
                 },
             },
         });
 
         return {
             deleted: result.deleted,
-            message: `Đã xoá tất cả document có id = ${productId}`,
+            message: `Đã xoá tất cả document có id = ${videoId}`,
         };
     }
 }

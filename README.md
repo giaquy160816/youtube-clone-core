@@ -116,26 +116,23 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache
 
 ```bash
 # -f: ép dừng container nếu đang chạy
-docker rm -f nestjs-dev nestjs-runtime
+docker rm -f nestjs-dev
 ```
 
 #### ✅ 2. Xóa image
 
 ```bash
-# Lọc image có tên chứa nestjs (hoặc cụ thể hơn: nestjs-dev, nestjs-runtime)
-docker rmi $(docker images | grep 'nestjs' | awk '{print $3}')
+docker rmi youtube-clone-core-dev:latest
 ```
 
 #### ✅ 3. Xóa volume liên quan (nếu cần)
 
 ```bash
 # Kiểm tra volume nào có tên liên quan nestjs
-docker volume ls | grep nestjs
+docker volume ls
 
 # Sau đó xóa:
 docker volume rm <volume-name>
-## Hoặc xóa tất cả volume không dùng:
-docker volume prune -f
 ```
 
 #### ✅ 4. Xóa thư mục node_modules / file package-lock.json dưới local

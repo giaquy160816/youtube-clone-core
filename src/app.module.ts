@@ -6,6 +6,9 @@ import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RouterModule } from '@nestjs/core';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import * as mime from 'mime-types';
 
 // Libaries Third Party
 import { initializeApp } from 'firebase-admin/app'; // kết nối firebase
@@ -62,6 +65,20 @@ import { ClientsModule } from '@nestjs/microservices';
             }),
         }),
         CustomElasticsearchModule,
+        ServeStaticModule.forRoot({
+            rootPath: join(__dirname, '..', 'uploads'),
+            serveRoot: '/uploads',
+            serveStaticOptions: {
+                setHeaders: (res, path) => {
+                    const contentType = mime.lookup(path);
+                    if (contentType) {
+                        res.setHeader('Content-Type', contentType);
+                        res.setHeader('Content-Disposition', 'inline');
+                    }
+                },
+            },
+        }),
+
         RouterModule.register([
             ...frontendRoutes,
             ...backendRoutes,

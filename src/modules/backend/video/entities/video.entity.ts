@@ -2,23 +2,19 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    JoinTable,
-    ManyToMany,
+    ManyToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
-import { Category } from 'src/modules/backend/category/entities/category.entity';
+import { User } from 'src/modules/backend/user/entities/user.entity';
 
-@Entity('product')
-export class Product {
+@Entity('video')
+export class Video {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column({ nullable: false })
-    name: string;
-
-    @Column({ type: 'float', nullable: false })
-    price: number;
+    title: string;
 
     @Column({ type: 'text', nullable: true })
     description?: string;
@@ -26,11 +22,11 @@ export class Product {
     @Column({ type: 'text', nullable: true })
     image?: string;
 
+    @Column({ type: 'text', nullable: true })
+    path?: string;
+
     @Column({ type: 'boolean', default: true })
     isActive: boolean;
-
-    @Column({ type: 'text', array: true, default: [] })
-    album: string[];
 
     @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
@@ -38,7 +34,8 @@ export class Product {
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
 
-    @ManyToMany(() => Category, (category) => category.products, { cascade: true })
-    @JoinTable()
-    categories: Category[];
+    @ManyToOne(() => User, (user) => user.videos, {
+        onDelete: 'CASCADE',
+    })
+    user: User;
 }
