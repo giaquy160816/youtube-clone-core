@@ -6,13 +6,6 @@
 
 Project clone youtube with nestjs frame
 
-## Project setup local when finish when docker run success
-
-```bash
-$ npm install
-```
-
-
 ## 🐳 Docker Setup Guide for Local Development
 
 This project uses **Docker Compose** to run NestJS in both development (`nestjs-dev`) and production (`nestjs-runtime`) modes. It also includes essential services: **PostgreSQL**, **Redis**, **Elasticsearch**, **Kibana**, and **RabbitMQ**.
@@ -74,26 +67,6 @@ Docker won't reload env vars automatically. Do this instead:
 docker-compose stop nestjs-dev
 docker-compose up dev
 ```
-
----
-
-### ⚙️ Environment Configuration
-
-Create `.env.development` file with the following:
-
-```env
-DB_POSTGRES_HOST=postgres-db
-DB_POSTGRES_PORT=5432
-DB_POSTGRES_USERNAME=myuser
-DB_POSTGRES_PASSWORD=mypassword
-DB_POSTGRES_DATABASE=mydatabase
-
-REDIS_HOST=redis-cache
-RABBITMQ_URL=amqp://rabbituser:rabbitpassword@rabbitmq:5672
-RABBITMQ_QUEUE=my_queue_name
-```
-
-> Ensure `ConfigModule.forRoot({ isGlobal: true })` reads from this `.env.development` file.
 
 ---
 
@@ -177,6 +150,12 @@ rm -f package-lock.json
 ```bash
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml build dev    
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up dev
+```
+
+## Project setup local when finish when docker run success
+
+```bash
+$ npm install
 ```
 
 ---
