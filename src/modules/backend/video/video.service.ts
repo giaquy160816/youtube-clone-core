@@ -6,6 +6,7 @@ import { Video } from './entities/video.entity';
 import { SearchVideoService } from './video-search.service';
 import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
+import { User } from 'src/modules/backend/user/entities/user.entity';
 
 @Injectable()
 export class VideoService {
@@ -40,6 +41,19 @@ export class VideoService {
         video.image = createVideoDto.image;
         video.isActive = createVideoDto.isActive ?? true;
         video.path = createVideoDto.path;
+
+        if (!createVideoDto.userId) {
+            throw new HttpException('UserId is required', HttpStatus.BAD_REQUEST);
+        }
+
+        // Kiểm tra userId có tồn tại không
+        const user = await this.videoRepository.manager.getRepository(User).findOne({
+            where: { id: createVideoDto.userId }
+        });
+        if (!user) {
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+        }
+        video.user = user;
 
         const result = await this.videoRepository.save(video);
 
@@ -105,7 +119,6 @@ export class VideoService {
     async findOne(id: number) {
         const video = await this.videoRepository.findOne({
             where: { id },
-            relations: ['categories']
         });
         if (!video) {
             throw new HttpException('Video not found', HttpStatus.NOT_FOUND);

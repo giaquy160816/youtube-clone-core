@@ -1,7 +1,7 @@
 import { Routes } from '@nestjs/core';
-import { AuthModule } from '../modules/backend/auth/auth.module';
-import { UserModule } from '../modules/backend/user/user.module';
-import { VideoModule } from '../modules/backend/video/video.module';
+import { AuthModule } from 'src/modules/backend/auth/auth.module';
+import { UserModule } from 'src/modules/backend/user/user.module';
+import { VideoModule } from 'src/modules/backend/video/video.module';
 import { SettingModule } from 'src/modules/backend/setting/setting.module';
 import { TokenModule } from 'src/modules/backend/token/token.module';
 import { CommonModule } from 'src/modules/backend/common/common.module';
