@@ -6,7 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
-import { RedisClientType } from 'redis';
+import { RedisService } from 'src/service/redis/redis.service';
+
 
 @Injectable()
 export class UserService {
@@ -15,8 +16,7 @@ export class UserService {
         private userRepository: Repository<User>,
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
 
-        @Inject('REDIS_CLIENT')
-        private readonly redisClient: RedisClientType
+        private readonly redisService: RedisService
     ) { }
 
     async create(createUserDto: CreateUserDto): Promise<User> {
@@ -29,24 +29,26 @@ export class UserService {
     }
 
     async findAll(): Promise<User[]> {
-        const cached = await this.redisClient.get('users');
-        if (cached) {
-            console.log('From Redis');
-            return JSON.parse(cached);
+        try {
+            const cachedUsers = await this.redisService.getJson<User[]>('users');
+
+            if (cachedUsers) {
+                console.log('From Redis');
+                return cachedUsers;
+            }
+
+            console.log('From Database');
+            const users = await this.userRepository.createQueryBuilder('user')
+                .select(['user.id', 'user.fullname', 'user.email'])
+                .getMany();
+
+            await this.redisService.setJson('users', users, 3600); // TTL 1h
+            return users;
+
+        } catch (error) {
+            console.error('Error finding all users:', error);
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        console.log('From Database');
-        const users = await this.userRepository.createQueryBuilder('user')
-            .select([
-                'user.id',
-                'user.fullname',
-                'user.email',
-            ])
-            .getMany();
-        
-        await this.redisClient.set('users', JSON.stringify(users), {
-            EX: 60,
-        });
-        return users;
     }
 
     async search(q: string): Promise<User[]> {

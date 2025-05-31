@@ -44,7 +44,6 @@ export default () => {
             discordWebhook: process.env.DISCORD_WEBHOOK_URL,
         },
         cors: (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:4000').split(','),
-        ipWhitelist: (process.env.IP_WHITELIST || '127.0.0.1,::1,::ffff:127.0.0.1').split(','),
         port: parseInt(process.env.PORT || '3001', 10),
         rateLimit: {
             ttl: parseInt(process.env.RATE_LIMIT_TTL || '60', 10),

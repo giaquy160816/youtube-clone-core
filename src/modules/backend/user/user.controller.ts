@@ -8,32 +8,16 @@ import { ApiOperation, ApiResponse, ApiUnauthorizedResponse, ApiBearerAuth } fro
 import { AuthGuard } from 'src/guards/auth/auth.guard';
 
 @Controller()
-@UseGuards(AuthGuard)
-@ApiBearerAuth('access_token')
 export class UserController {
     constructor(private userService: UserService) { }
 
     @Get('all')     
-    @Permissions(['user_get_all'])
-    @ApiOperation({ 
-        summary: 'Get all users', 
-        description: 'Get all users',
-        operationId: 'getUsers',
-    })
-    @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
-    @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+    // @Permissions(['user_get_all'])
     findAll(): Promise<User[]> {
         return this.userService.findAll();
     }
 
     @Get('search')
-    @ApiOperation({ 
-        summary: 'Search users', 
-        description: 'Search users by query string',
-        operationId: 'searchUsers',
-    })
-    @ApiResponse({ status: 200, description: 'Users found successfully' })
-    @ApiUnauthorizedResponse({ description: 'Unauthorized' })
     search(@Query('q') q: string): Promise<User[]> {
         return this.userService.search(q);
     }

@@ -44,7 +44,6 @@ import { RolesGuard } from 'src/guards/auth/roles.guard';
 import { SearchService } from './service/elasticsearch/search.service';
 import { CustomThrottlerGuard } from './guards/other/custom-throttler.guard';
 
-import { DatabaseService } from './database/database.service';
 import { Token } from './modules/backend/token/entities/token.entity';
 import { ClientsModule } from '@nestjs/microservices';
 
@@ -124,7 +123,6 @@ import { ClientsModule } from '@nestjs/microservices';
         { provide: APP_GUARD, useClass: RolesGuard }, // check quyền truy cập
         SearchService,
         SupabaseService, // kết nối supabase
-        // DatabaseService, // tạo trigger trong database ( Auth - User table ) chỉ dùng khi chạy sv lần đầu xoá hết table tạo lại
     ]
 })
 export class AppModule implements NestModule {

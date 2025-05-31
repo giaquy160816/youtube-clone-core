@@ -8,10 +8,9 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { LoginGGDto } from './dto/login-gg.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import configuration from '../../../config/configuration';
-import { generateTokens } from '../../../utils/token/jwt.utils';
-
-
+import configuration from 'src/config/configuration';
+import { generateTokens } from 'src/utils/token/jwt.utils';
+import { User } from 'src/modules/backend/user/entities/user.entity';
 
 // check token jwt gg
 import * as adminGG from 'firebase-admin';
@@ -22,6 +21,8 @@ export class AuthService {
         @InjectRepository(Auth)
         private authRepository: Repository<Auth>,
         private jwtService: JwtService,
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
     ) { }
 
     async login(loginDto: LoginDto) {
@@ -91,6 +92,16 @@ export class AuthService {
 
         // Save to database
         await this.authRepository.save(auth);
+
+        // Create user row linked to auth
+        const user = this.userRepository.create({
+            fullname,
+            email,
+            phone: '', // mặc định rỗng
+            avatar: '', // mặc định rỗng
+            auth: auth, // liên kết với auth vừa tạo
+        });
+        await this.userRepository.save(user);
 
         return {
             message: 'Registration successful',
