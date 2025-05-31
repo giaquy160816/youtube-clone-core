@@ -1,18 +1,17 @@
 import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY } from 'src/common/constants/meta-keys';
+import { Repository } from 'typeorm';
 import { USE_DATABASE_TOKEN_KEY } from 'src/decorators/use-database-token.decorator';
 import { extractTokenFromHeader } from 'src/utils/token/extractToken.utils';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { AccessToken } from 'src/modules/backend/auth/entities/access-token.entity';
+import { Token } from 'src/modules/backend/token/entities/token.entity';
 
 @Injectable()
 export class DatabaseTokenGuard implements CanActivate {
     constructor(
         private readonly reflector: Reflector,
-        @InjectRepository(AccessToken)
-        private readonly accessTokenRepository: Repository<AccessToken>,
+        @InjectRepository(Token)
+        private readonly tokenRepository: Repository<Token>,
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -36,7 +35,7 @@ export class DatabaseTokenGuard implements CanActivate {
 
         try {
             // Find token in database
-            const accessToken = await this.accessTokenRepository.findOne({
+            const tokenEntity = await this.tokenRepository.findOne({
                 where: { 
                     token,
                     isActive: true,
@@ -44,21 +43,21 @@ export class DatabaseTokenGuard implements CanActivate {
                 relations: ['user']
             });
 
-            console.log(accessToken);
+            console.log(tokenEntity);
 
-            if (!accessToken) {
+            if (!tokenEntity) {
                 throw new HttpException('Invalid token Custom', HttpStatus.UNAUTHORIZED);
             }
 
             // Check if token is expired
-            if (accessToken.expiresAt && new Date() > accessToken.expiresAt) {
+            /*
+            if (tokenEntity.expiresAt && new Date() > tokenEntity.expiresAt) {
                 throw new HttpException('Token expired', HttpStatus.UNAUTHORIZED);
             }
-
-            console.log(accessToken);
+            */
 
             // Get user roles from permissions
-            const user = accessToken.user;
+            const user = tokenEntity.user;
             
 
             // Attach user info to request

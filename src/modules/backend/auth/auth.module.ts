@@ -8,11 +8,10 @@ import { Auth } from './entities/auth.entity';
 import { Permission } from './entities/permisson.entity';
 import { JwtService } from '@nestjs/jwt';
 import { GroupPermission } from './entities/group_permission.entity';
-import { AccessToken } from './entities/access-token.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Auth, Permission, GroupPermission, AccessToken]),
+        TypeOrmModule.forFeature([Auth, Permission, GroupPermission]),
         JwtModule.register({
             secret: configuration().jwt.secret,
             signOptions: { expiresIn: configuration().jwt.expires || '1h' },

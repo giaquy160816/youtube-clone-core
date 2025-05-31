@@ -21,7 +21,6 @@ import configuration from './config/configuration'; // config
 // Database
 //datasource
 import PostgresDataSource from './datasources/postgres.datasource';
-import MysqlDataSource from './datasources/mysql.datasource';
 import { CustomElasticsearchModule } from './service/elasticsearch/elasticsearch.module';
 
 
@@ -43,7 +42,7 @@ import { SearchService } from './service/elasticsearch/search.service';
 import { CustomThrottlerGuard } from './guards/other/custom-throttler.guard';
 
 import { DatabaseService } from './database/database.service';
-import { AccessToken } from './modules/backend/auth/entities/access-token.entity';
+import { Token } from './modules/backend/token/entities/token.entity';
 import { ClientsModule } from '@nestjs/microservices';
 
 @Module({
@@ -70,7 +69,7 @@ import { ClientsModule } from '@nestjs/microservices';
         ...frontendModules,
         ...backendModules,
 
-        TypeOrmModule.forFeature([AccessToken]),
+        TypeOrmModule.forFeature([Token]),
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],
             useFactory: () => {
