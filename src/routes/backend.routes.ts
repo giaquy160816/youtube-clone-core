@@ -4,6 +4,8 @@ import { UserModule } from '../modules/backend/user/user.module';
 import { PhotoModule } from '../modules/backend/photo/photo.module';
 import { CategoryModule } from '../modules/backend/category/category.module';
 import { ProductModule } from '../modules/backend/product/product.module';
+import { SettingModule } from 'src/modules/backend/setting/setting.module';
+
 
 export const backendRoutes: Routes = [
     { path: 'backend/auth', module: AuthModule },
@@ -11,6 +13,7 @@ export const backendRoutes: Routes = [
     { path: 'backend/photo', module: PhotoModule },
     { path: 'backend/category', module: CategoryModule },
     { path: 'backend/product', module: ProductModule },
+    { path: 'backend/setting', module: SettingModule },
 ];
 
 export const backendModules = [
@@ -19,4 +22,5 @@ export const backendModules = [
     PhotoModule,
     CategoryModule,
     ProductModule,
+    SettingModule,
 ];

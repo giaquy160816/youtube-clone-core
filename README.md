@@ -2,30 +2,11 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Project clone youtube with nestjs frame
 
-## Project setup
+## Project setup local when finish when docker run success
 
 ```bash
 $ npm install
@@ -156,21 +137,47 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache
 
 ---
 
-### 🛠 Recommended VS Code Extensions
+### 🛠 When you need to install a new library, follow these steps:
 
-- Docker
-- ESLint
-- Prettier
-- DotENV
-- Prisma (if applicable)
+#### ✅ 1. Dừng và xóa container
 
----
+```bash
+# -f: ép dừng container nếu đang chạy
+docker rm -f nestjs-dev nestjs-runtime
+```
 
-### 🤝 Contributing
+#### ✅ 2. Xóa image
 
-1. Fork or clone this repo
-2. Run project using Docker as described above
-3. Submit pull request with proper branch naming and commit message convention
+```bash
+# Lọc image có tên chứa nestjs (hoặc cụ thể hơn: nestjs-dev, nestjs-runtime)
+docker rmi $(docker images | grep 'nestjs' | awk '{print $3}')
+```
+
+#### ✅ 3. Xóa volume liên quan (nếu cần)
+
+```bash
+# Kiểm tra volume nào có tên liên quan nestjs
+docker volume ls | grep nestjs
+
+# Sau đó xóa:
+docker volume rm <volume-name>
+## Hoặc xóa tất cả volume không dùng:
+docker volume prune -f
+```
+
+#### ✅ 4. Xóa thư mục node_modules / file package-lock.json dưới local
+
+```bash
+rm -rf node_modules    
+rm -f package-lock.json
+```
+
+#### ✅ 5. Tiến hành build lại container dev - runtime 
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml build dev    
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up dev
+```
 
 ---
 

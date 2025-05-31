@@ -5,8 +5,7 @@ node_modules
 
 # Bỏ các file cấu hình local, môi trường
 .env
-.env.*
-firebase-admin-key.json
+.env.development
 
 # IDE/editor
 .vscode

@@ -39,7 +39,7 @@ import { SearchService } from './service/elasticsearch/search.service';
 
 import { DatabaseService } from './database/database.service';
 import { AccessToken } from './modules/backend/auth/entities/access-token.entity';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ClientsModule } from '@nestjs/microservices';
 
 import { rabbitMqConfig } from './service/rabbitMQ/rabbitmq.config';
 import { SupabaseService } from './service/supabase/supabase.service';
@@ -132,7 +132,7 @@ export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
         consumer
             .apply(
-                // IpWhitelistMiddleware,
+                IpWhitelistMiddleware,
                 RequestTimingMiddleware,
                 SanitizeInputMiddleware
             )
