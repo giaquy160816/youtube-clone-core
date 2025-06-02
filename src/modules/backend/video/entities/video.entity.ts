@@ -25,6 +25,9 @@ export class Video {
     @Column({ type: 'text', nullable: true })
     path?: string;
 
+    @Column({ type: 'int', default: 0 })
+    view: number;
+
     @Column({ type: 'boolean', default: true })
     isActive: boolean;
 

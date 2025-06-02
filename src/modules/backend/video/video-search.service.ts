@@ -59,34 +59,40 @@ export class SearchVideoService implements OnApplicationBootstrap {
         });
     }
 
-    async searchAdvanced(q: string, page = 1, limit = 2) {
-        const isNumber = /^\d+$/.test(q); // kiểm tra nếu là số (để match id)
+    async searchAdvanced(q?: string, page = 1, limit = 2) {
+        const from = (page - 1) * limit;
+        const isNumber = q && /^\d+$/.test(q);
 
-        const query: any = {
-            bool: {
-                should: [
-                    {
-                        match: {
-                            title: {
-                                query: q,
-                                fuzziness: 'auto',
+        // Nếu không có query thì match_all
+        const query: any = q
+            ? {
+                bool: {
+                    should: [
+                        {
+                            match: {
+                                title: {
+                                    query: q,
+                                    fuzziness: 'auto',
+                                },
                             },
                         },
-                    },
-                    {
-                        match: {
-                            description: {
-                                query: q,
-                                fuzziness: 'auto',
+                        {
+                            match: {
+                                description: {
+                                    query: q,
+                                    fuzziness: 'auto',
+                                },
                             },
                         },
-                    },
-                ],
-            },
-        };
+                    ],
+                },
+            }
+            : {
+                match_all: {},
+            };
 
-        // Nếu là số → thêm điều kiện match id
-        if (isNumber) {
+        // Nếu là số và có query → thêm điều kiện match theo ID
+        if (q && isNumber) {
             query.bool.should.push({
                 term: {
                     id: parseInt(q),
@@ -94,16 +100,27 @@ export class SearchVideoService implements OnApplicationBootstrap {
             });
         }
 
-        const from = (page - 1) * limit;
         const result = await this.searchService.search({
             index: 'videos',
             query,
             from,
             size: limit,
+            sort: [
+                {
+                    id: {
+                        order: 'desc',
+                    },
+                },
+            ],
         });
 
-        const total = typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value || 0;
+        const total =
+            typeof result.hits.total === 'number'
+                ? result.hits.total
+                : result.hits.total?.value || 0;
+
         const data = result.hits.hits.map((hit) => hit._source);
+
         return { data, total, page, limit };
     }
 

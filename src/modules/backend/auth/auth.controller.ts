@@ -8,7 +8,7 @@ import { Public } from 'src/decorators/public.decorator';
 @Controller()
 @Public()
 export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+    constructor(private readonly authService: AuthService) { }
 
     @Post('login')
     async login(@Body() loginDto: LoginDto) {
@@ -23,6 +23,13 @@ export class AuthController {
         const token = authHeader.split(' ')[1];
         return this.authService.loginGG(token);
     }
+
+    @Post('login-google-supabase')
+    async loginWithGoogle(@Body('token') token: string) {
+        return this.authService.validateGoogleToken(token);
+    }
+
+
 
     @Post('register')
     async register(@Body() registerDto: RegisterDto) {

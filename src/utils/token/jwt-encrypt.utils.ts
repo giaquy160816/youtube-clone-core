@@ -32,3 +32,8 @@ export function verifyEncryptedJwt(token: string): object {
     const decoded = jwt.verify(token, secretKey) as any;
     return decryptPayload(decoded.data);
 }
+
+
+export function generateRandomPassword(length = 16): string {
+    return crypto.randomBytes(length).toString('hex').slice(0, length);
+}

@@ -6,12 +6,12 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { LoginGGDto } from './dto/login-gg.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import configuration from 'src/config/configuration';
 import { generateTokens } from 'src/utils/token/jwt.utils';
 import { User } from 'src/modules/backend/user/entities/user.entity';
-
+import { generateRandomPassword } from 'src/utils/token/jwt-encrypt.utils';
+import axios from 'axios';
 // check token jwt gg
 import * as adminGG from 'firebase-admin';
 
@@ -55,8 +55,6 @@ export class AuthService {
             fullname: user.fullname,
             roles: roles.join('|')
         };
-        
-        console.log(payload);
         const tokens = generateTokens(
             this.jwtService,
             payload
@@ -64,7 +62,11 @@ export class AuthService {
         return {
             token: tokens,
             message: 'Login successful',
-            data: { email: auth.email },
+            data: {
+                email: auth.email,
+                fullname: auth.fullname,
+                avatar: user.avatar
+            },
         };
     }
 
@@ -145,6 +147,130 @@ export class AuthService {
             };
         } catch (err) {
             throw new BadRequestException('Invalid token');
+        }
+    }
+
+    async validateGoogleToken(accessToken: string) {
+        try {
+            const res = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            const data = res.data as {
+                email: string;
+                name: string;
+                picture: string;
+                id: string;
+            };
+
+            const { email, name: fullname, picture: avatar, id: googleId } = data;
+
+            if (!email || !googleId) {
+                throw new HttpException('Google không trả thông tin đầy đủ', HttpStatus.UNAUTHORIZED);
+            }
+
+            // Tìm user hoặc tạo mới
+            const existingAuth = await this.authRepository.findOne({
+                where: { email },
+                relations: ['user', 'user.groupPermissions', 'user.groupPermissions.permissions']
+            });
+
+            if (existingAuth) {
+                const user = existingAuth.user;
+
+                const roles = Array.from(
+                    new Set(
+                        user.groupPermissions.flatMap(gp =>
+                            gp.permissions.map(p => p.role)
+                        )
+                    )
+                );
+
+                const payload = {
+                    sub: user.id,
+                    email: user.email,
+                    fullname: user.fullname,
+                    roles: roles.join('|')
+                };
+                const tokens = generateTokens(
+                    this.jwtService,
+                    payload
+                );
+                return {
+                    token: tokens,
+                    message: 'Login successful',
+                    data: {
+                        email: existingAuth.email,
+                        fullname: existingAuth.fullname,
+                        avatar: user.avatar
+                    }
+                };
+            }
+
+            // Hash password
+            const randomPassword = generateRandomPassword();
+            const salt = await bcrypt.genSalt();
+            const hashedPassword = await bcrypt.hash(randomPassword, salt);
+            console.log({
+                email,
+                fullname,
+                password: hashedPassword,
+                avatar
+            });
+
+
+            //Create new auth
+            const auth = this.authRepository.create({
+                email,
+                fullname,
+                password: hashedPassword,
+            });
+
+            // Save to database
+            const authNew = await this.authRepository.save(auth);
+
+            if (authNew) {
+                // Create user row linked to auth
+                const user = this.userRepository.create({
+                    fullname,
+                    email,
+                    phone: '',
+                    avatar: avatar,
+                    auth: authNew,
+                });
+                const userNew = await this.userRepository.save(user);
+                if (userNew) {
+
+                    const payload = {
+                        sub: userNew.id,
+                        email: userNew.email,
+                        fullname: userNew.fullname,
+                        roles: ''
+                    };
+                    const tokens = generateTokens(
+                        this.jwtService,
+                        payload
+                    );
+                    return {
+                        token: tokens,
+                        message: 'Login successful',
+                        data: {
+                            email: auth.email,
+                            fullname: auth.fullname,
+                            avatar: user.avatar
+                        }
+                    };
+                }
+            }
+
+            console.log(hashedPassword);
+        } catch (error) {
+
+            console.error('❌ Google token invalid:', error?.response?.data || error.message);
+
+            throw new HttpException('Google token invalid', HttpStatus.UNAUTHORIZED);
         }
     }
 } 

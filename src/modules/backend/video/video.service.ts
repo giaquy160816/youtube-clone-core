@@ -26,10 +26,18 @@ export class VideoService {
             image: video.image,
             isActive: video.isActive,
             path: video.path,
-            user: video.user,
+            view: video.view,
+            user_id: video.user?.id,
+            user_fullname: video.user?.fullname,
+            user_avatar: video.user?.avatar,
+            createdAt: video.createdAt.toISOString(),
         };
-    
-        this.client.emit('index_video', { index: 'videos', document: formattedVideo }).subscribe();
+
+        this.client.emit('index_video', {
+            index: 'videos',
+            document: formattedVideo,
+        }).subscribe();
+
         return formattedVideo;
     }
     
@@ -81,7 +89,7 @@ export class VideoService {
 
         const result = await this.videoRepository.save(video);
 
-        const formattedVideo = await this.formatAndIndexVideo(result);
+        await this.formatAndIndexVideo(result);
         return {
             message: 'Video updated successfully',
         };
@@ -117,9 +125,26 @@ export class VideoService {
     }
 
     async findOne(id: number) {
-        const video = await this.videoRepository.findOne({
-            where: { id },
-        });
+        const video = await this.videoRepository
+                    .createQueryBuilder('video')
+                    .leftJoinAndSelect('video.user', 'user')
+                    .select([
+                        'video.id',
+                        'video.title',
+                        'video.description',
+                        'video.image',
+                        'video.path',
+                        'video.view',
+                        'video.isActive',
+                        'video.createdAt',
+                        'video.updatedAt',
+                        'user.id',
+                        'user.fullname',
+                        'user.avatar',
+                    ])
+                    .where('video.id = :id', { id })
+                    .getOne();
+
         if (!video) {
             throw new HttpException('Video not found', HttpStatus.NOT_FOUND);
         }
@@ -127,7 +152,25 @@ export class VideoService {
     }
 
     async reindexAllToES() {
-        const videos = await this.videoRepository.find();
+        const videos = await this.videoRepository
+                .createQueryBuilder('video')
+                .leftJoinAndSelect('video.user', 'user')
+                .select([
+                    'video.id',
+                    'video.title',
+                    'video.description',
+                    'video.image',
+                    'video.path',
+                    'video.view',
+                    'video.isActive',
+                    'video.createdAt',
+                    'video.updatedAt',
+                    'user.id',
+                    'user.fullname',
+                    'user.avatar'
+                ])
+                .getMany();
+                
         const formattedVideos = await Promise.all(videos.map(video => this.formatAndIndexVideo(video)));
         console.log(`🗃️ DB có ${videos.length} video`);
         return {
