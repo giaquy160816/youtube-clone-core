@@ -2,6 +2,7 @@ import { JwtService } from '@nestjs/jwt';
 import configuration from '../../config/configuration';
 
 import { encryptPayload } from './jwt-encrypt.utils';
+import { parseDurationToSeconds } from '../other/parseDurationToSeconds';
 
 export function generateTokens(jwtService: JwtService, payload: { 
     sub: number; 
@@ -12,7 +13,7 @@ export function generateTokens(jwtService: JwtService, payload: {
 
 
     const encrypted = encryptPayload(payload);
-    console.log(configuration().jwt.secret);
+    const expiresInNumber = parseDurationToSeconds(configuration().jwt.expires);
     
     const accessToken = jwtService.sign({ data: encrypted }, {
         secret: configuration().jwt.secret,
@@ -25,7 +26,6 @@ export function generateTokens(jwtService: JwtService, payload: {
     return {
         accessToken,
         refreshToken,
-        expiresIn: configuration().jwt.expires,
-        refreshExpiresIn: configuration().jwt.refreshExpires,
+        expiresIn: Math.floor(Date.now() / 1000) + expiresInNumber, // Convert to Unix timestamp
     };
 } 

@@ -60,13 +60,12 @@ export class AuthService {
             payload
         );
         return {
-            token: tokens,
-            message: 'Login successful',
-            data: {
+            ...tokens,
+            user: {
                 email: auth.email,
                 fullname: auth.fullname,
                 avatar: user.avatar
-            },
+            }
         };
     }
 
@@ -127,9 +126,10 @@ export class AuthService {
         const payload = { sub: decoded.sub, email: decoded.email };
         const tokens = generateTokens(this.jwtService, payload);
         return {
-            token: tokens,
-            message: 'Token refreshed',
-            data: { email: payload.email },
+            ...tokens,
+            user: {
+                email: payload.email,
+            }
         };
     }
 
@@ -200,9 +200,8 @@ export class AuthService {
                     payload
                 );
                 return {
-                    token: tokens,
-                    message: 'Login successful',
-                    data: {
+                    ...tokens,
+                    user: {
                         email: existingAuth.email,
                         fullname: existingAuth.fullname,
                         avatar: user.avatar
@@ -255,9 +254,8 @@ export class AuthService {
                         payload
                     );
                     return {
-                        token: tokens,
-                        message: 'Login successful',
-                        data: {
+                        ...tokens,
+                        user: {
                             email: auth.email,
                             fullname: auth.fullname,
                             avatar: user.avatar
