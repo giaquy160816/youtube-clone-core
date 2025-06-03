@@ -17,7 +17,7 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 3001
+EXPOSE 3002
 CMD ["npm", "run", "start:dev"]
 
 # Stage 3: Runtime (production)
@@ -31,5 +31,5 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/keys/firebase-admin-key.json ./src/keys/firebase-admin-key.json
 COPY --from=builder /app/.env.production ./.env
 
-EXPOSE 3001
+EXPOSE 3002
 CMD ["node", "dist/main"]

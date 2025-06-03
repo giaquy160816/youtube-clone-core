@@ -6,7 +6,7 @@ services:
       target: dev
     container_name: nestjs-dev
     ports:
-      - "3002:3001"
+      - "3002:3002"
     volumes:
       - .:/app
       - /app/node_modules

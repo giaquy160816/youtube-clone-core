@@ -42,7 +42,6 @@ export class HomeService {
             "createdAt": formatDistance(detail.createdAt, new Date(), { addSuffix: true, locale: vi }),
             "avatar": detail.user.avatar,
         }
-        console.log(detail);
         
         return {
             'status': 1,
