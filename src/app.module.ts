@@ -9,6 +9,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import * as mime from 'mime-types';
+import { ScheduleModule } from '@nestjs/schedule';
 
 // Libaries Third Party
 import { initializeApp } from 'firebase-admin/app'; // kết nối firebase
@@ -86,6 +87,7 @@ import { ClientsModule } from '@nestjs/microservices';
         ...backendModules,
 
         TypeOrmModule.forFeature([Token]),
+        ScheduleModule.forRoot(),
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],
             useFactory: () => {

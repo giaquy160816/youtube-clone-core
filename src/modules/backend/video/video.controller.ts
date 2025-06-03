@@ -10,12 +10,14 @@ import {
     UseInterceptors,
     UploadedFile,
     BadRequestException,
+    Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { VideoService } from './video.service';
 import { VideoUploadService } from './video-upload.service';
+import { Request } from 'express';
 
 @Controller()
 export class VideoController {
@@ -24,10 +26,31 @@ export class VideoController {
         private readonly videoUploadService: VideoUploadService,
     ) { }
 
+    @Post('upload')
+    @UseInterceptors(FileInterceptor('file'))
+    async uploadVideo(@UploadedFile() file: Express.Multer.File) {
+        if (!file) {
+            throw new BadRequestException('No file uploaded');
+        }
+        
+        const filePath = await this.videoUploadService.uploadVideo(file);
+        return {
+            path: filePath
+        };
+    }
+    
     // cập nhật toàn bộ video từ DB vào ES
     @Post('reindex')
     async reindexAll() {
         return this.videoService.reindexAllToES();
+    }
+
+    @Post(':id/view')
+    async addView(@Param('id') id: string, @Req() req: Request) {
+        const forwardedFor = req.headers['x-forwarded-for'];
+        const ip = req.ip || (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor) || 'unknown';
+        await this.videoService.recordView(id, ip);
+        return { success: true };
     }
 
     // tạo video mới
@@ -35,6 +58,7 @@ export class VideoController {
     create(@Body() createVideoDto: CreateVideoDto) {
         return this.videoService.create(createVideoDto);
     }
+    
 
     // cập nhật video
     @Put(':id')
@@ -67,16 +91,4 @@ export class VideoController {
         return this.videoService.removeVideo(id);
     }
 
-    @Post('upload')
-    @UseInterceptors(FileInterceptor('file'))
-    async uploadVideo(@UploadedFile() file: Express.Multer.File) {
-        if (!file) {
-            throw new BadRequestException('No file uploaded');
-        }
-        
-        const filePath = await this.videoUploadService.uploadVideo(file);
-        return {
-            path: filePath
-        };
-    }
 }

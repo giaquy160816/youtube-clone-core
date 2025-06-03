@@ -7,6 +7,7 @@ import { SearchVideoService } from './video-search.service';
 import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { User } from 'src/modules/backend/user/entities/user.entity';
+import { RedisService } from 'src/service/redis/redis.service';
 
 @Injectable()
 export class VideoService {
@@ -15,6 +16,7 @@ export class VideoService {
         private videoRepository: Repository<Video>,
         private SearchVideoService: SearchVideoService,
         @Inject('APP_SERVICE') private readonly client: ClientProxy,
+        private readonly redisService: RedisService
     ) {
     }
 
@@ -40,7 +42,7 @@ export class VideoService {
 
         return formattedVideo;
     }
-    
+
 
     async create(createVideoDto: CreateVideoDto) {
         const video = new Video();
@@ -95,7 +97,7 @@ export class VideoService {
         };
     }
 
-    
+
     async searchVideos(q: string, page = 1, limit = 2) {
         return this.SearchVideoService.searchAdvanced(q, page, limit);
     }
@@ -126,24 +128,24 @@ export class VideoService {
 
     async findOne(id: number) {
         const video = await this.videoRepository
-                    .createQueryBuilder('video')
-                    .leftJoinAndSelect('video.user', 'user')
-                    .select([
-                        'video.id',
-                        'video.title',
-                        'video.description',
-                        'video.image',
-                        'video.path',
-                        'video.view',
-                        'video.isActive',
-                        'video.createdAt',
-                        'video.updatedAt',
-                        'user.id',
-                        'user.fullname',
-                        'user.avatar',
-                    ])
-                    .where('video.id = :id', { id })
-                    .getOne();
+            .createQueryBuilder('video')
+            .leftJoinAndSelect('video.user', 'user')
+            .select([
+                'video.id',
+                'video.title',
+                'video.description',
+                'video.image',
+                'video.path',
+                'video.view',
+                'video.isActive',
+                'video.createdAt',
+                'video.updatedAt',
+                'user.id',
+                'user.fullname',
+                'user.avatar',
+            ])
+            .where('video.id = :id', { id })
+            .getOne();
 
         if (!video) {
             throw new HttpException('Video not found', HttpStatus.NOT_FOUND);
@@ -153,29 +155,52 @@ export class VideoService {
 
     async reindexAllToES() {
         const videos = await this.videoRepository
-                .createQueryBuilder('video')
-                .leftJoinAndSelect('video.user', 'user')
-                .select([
-                    'video.id',
-                    'video.title',
-                    'video.description',
-                    'video.image',
-                    'video.path',
-                    'video.view',
-                    'video.isActive',
-                    'video.createdAt',
-                    'video.updatedAt',
-                    'user.id',
-                    'user.fullname',
-                    'user.avatar'
-                ])
-                .getMany();
-                
+            .createQueryBuilder('video')
+            .leftJoinAndSelect('video.user', 'user')
+            .select([
+                'video.id',
+                'video.title',
+                'video.description',
+                'video.image',
+                'video.path',
+                'video.view',
+                'video.isActive',
+                'video.createdAt',
+                'video.updatedAt',
+                'user.id',
+                'user.fullname',
+                'user.avatar'
+            ])
+            .getMany();
+
         const formattedVideos = await Promise.all(videos.map(video => this.formatAndIndexVideo(video)));
         console.log(`🗃️ DB có ${videos.length} video`);
         return {
             message: 'Reindex all videos to ES successfully',
             videos: formattedVideos,
         };
+    }
+
+    async recordView(videoId: string, ip: string) {
+        const lockKey = `viewlock:${videoId}:${ip}`;
+        const viewed = await this.redisService.get(lockKey);
+        if (viewed) return; // đã xem
+
+        await this.redisService.set(lockKey, '1', 600); // TTL 10 phút
+        await this.redisService.incr(`video:${videoId}:views`);
+    }
+
+    async syncViewsToDatabase() {
+        const keys = await this.redisService.keys('video:*:views');
+        for (const key of keys) {
+            const videoId = parseInt(key.split(':')[1], 10);
+            const countStr = await this.redisService.get(key);
+            const count = countStr ? parseInt(countStr, 10) : 0;
+            if (count > 0) {
+                await this.videoRepository.increment({ id: videoId }, 'view', count);
+                await this.redisService.del(key);
+                console.log(`Synced ${count} views for video ${videoId}`);
+            }
+        }
     }
 }

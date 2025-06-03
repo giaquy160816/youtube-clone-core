@@ -11,12 +11,14 @@ import { VideoController } from './video.controller';
 import { VideoMicroservice } from './video.microservice';
 import { VideoService } from './video.service';
 import { VideoUploadService } from './video-upload.service';
-
+import { RedisModule } from 'src/service/redis/redis.module';
+import { SyncViewsCron } from './cron/sync-views.cron';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([Video]),
         CustomElasticsearchModule,
+        RedisModule,
         ClientsModule.registerAsync([
             {
                 name: 'APP_SERVICE',
@@ -26,7 +28,7 @@ import { VideoUploadService } from './video-upload.service';
         ]),
     ],
     controllers: [VideoController, VideoMicroservice],
-    providers: [VideoService, SearchVideoService, VideoUploadService],
+    providers: [VideoService, SearchVideoService, VideoUploadService, SyncViewsCron],
     exports: [VideoService],
 })
 export class VideoModule {}
