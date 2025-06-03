@@ -24,7 +24,8 @@ export class SettingService {
     async findByKey(key: string): Promise<Setting | null> {
         const check = await this.settingRepository.findOne({ where: { keys: key } });
         if (!check) {
-            throw new HttpException('Setting not found', HttpStatus.NOT_FOUND);
+            return null;
+            // throw new HttpException('Setting not found', HttpStatus.NOT_FOUND);
         }
         return check;
     }
