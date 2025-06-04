@@ -122,7 +122,10 @@ docker rm -f nestjs-dev
 #### ✅ 2. Xóa image
 
 ```bash
-docker rmi youtube-clone-core-dev:latest
+docker rmi nestjs-dev:latest
+
+#Xoá những images đang không chạy
+docker image prune -a -f
 ```
 
 #### ✅ 3. Xóa volume liên quan (nếu cần)
