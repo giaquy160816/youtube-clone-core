@@ -3,7 +3,6 @@ import {
     IsNotEmpty,
     IsOptional,
     IsBoolean,
-    IsNumber,
 } from 'class-validator';
 
 export class CreateVideoDto {
@@ -26,8 +25,4 @@ export class CreateVideoDto {
     @IsOptional()
     @IsBoolean()
     isActive?: boolean;
-
-    @IsOptional()
-    @IsNumber()
-    userId: number;
 }

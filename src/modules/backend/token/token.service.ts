@@ -18,8 +18,25 @@ export class TokenService {
     }
 
 
-    async findAll(): Promise<Token[]> {
-        return this.tokenRepository.find();
+    async findAll(page: number = 1, limit: number = 10, q?: string) {
+        const take = limit;
+        const skip = (page - 1) * take;
+
+        const query = this.tokenRepository.createQueryBuilder('token');
+
+        if (q) {
+            query.where('token.value LIKE :q', { q: `%${q}%` });
+        }
+
+        const [data, total] = await query.skip(skip).take(take).getManyAndCount();
+
+        return {
+            data,
+            total,
+            page,
+            pageSize: take,
+            totalPages: Math.ceil(total / take),
+        };
     }
 
     async findOne(id: number): Promise<Token> {

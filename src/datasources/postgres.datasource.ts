@@ -8,7 +8,7 @@ const PostgresDataSource = new DataSource({
     port: parseInt(String(configuration().database_postgres.port)),
     username: configuration().database_postgres.username,
     password: configuration().database_postgres.password,
-    database: configuration().database_postgres.database
+    database: configuration().database_postgres.database,
 });
 
 // Don't initialize the DataSource here, let NestJS handle it

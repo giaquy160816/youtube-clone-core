@@ -3,38 +3,56 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 
 @Injectable()
 export class SearchVideoService implements OnApplicationBootstrap {
-    constructor(private readonly searchService: ElasticsearchService) { }
+    private readonly indexEs = 'videos';
 
-    async onApplicationBootstrap() {
-        console.log('elasticsearch service is ready');
-    }
+    constructor(
+        private readonly searchService: ElasticsearchService
+    ) {}
 
-    /*
+
     // Khi app khởi động se import tất cả video từ DB vào ES
     async onApplicationBootstrap() {
-        const exists = await this.searchService.indices.exists({ index: 'videos' });
+        console.log('elasticsearch service is ready');
+        const exists = await this.searchService.indices.exists({ index: this.indexEs });
         if (!exists) {
-            await this.searchService.indices.create({ index: 'videos' });
+            await this.searchService.indices.create({ index: this.indexEs });
             await this.searchService.indices.putMapping({
-                index: 'videos',
+                index: this.indexEs,
                 body: {
                     properties: {
                         id: { type: 'integer' },
-                        name: { type: 'text' },
+                        title: {
+                            type: 'text',
+                            fields: {
+                                keyword: { type: 'keyword', ignore_above: 256 }
+                            }
+                        },
                         description: { type: 'text' },
-                        price: { type: 'float' },
                         image: { type: 'keyword' },
+                        path: { type: 'keyword' },
+                        view: { type: 'integer' },
                         isActive: { type: 'boolean' },
-                        album: { type: 'keyword' },
-                        createdAt: { type: 'date' },
-                        updatedAt: { type: 'date' },
+                        createdAt: { type: 'date', format: 'strict_date_optional_time||epoch_millis' },
+                        updatedAt: { type: 'date', format: 'strict_date_optional_time||epoch_millis' },
+                        user: {
+                            properties: {
+                                id: { type: 'integer' },
+                                fullname: {
+                                    type: 'text',
+                                    fields: {
+                                        keyword: { type: 'keyword', ignore_above: 256 }
+                                    }
+                                },
+                                avatar: { type: 'keyword' }
+                            }
+                        }
                     }
                 }
             });
             console.log('✅ Index "videos" đã được khởi tạo và mapping.');
         }
     }
-    */
+
 
 
     async indexVideo(index: string, document: any) {
@@ -52,7 +70,7 @@ export class SearchVideoService implements OnApplicationBootstrap {
             query: {
                 multi_match: {
                     query,
-                    fields: ['name', 'description'],
+                    fields: ['title', 'description'],
                     fuzziness: 'auto',
                 },
             },
@@ -132,7 +150,6 @@ export class SearchVideoService implements OnApplicationBootstrap {
 
     async reindexAllVideos(videos: any[]) {
         console.log(`🔄 Đang reindex ${videos.length} video...`);
-
         for (const video of videos) {
             await this.indexVideo('videos', video);
         }

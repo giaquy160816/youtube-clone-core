@@ -1,7 +1,9 @@
+// src/modules/backend/user/entities/user.entity.ts
+
 import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToMany, JoinTable } from "typeorm";
 import { Auth } from 'src/modules/backend/auth/entities/auth.entity';
-import { GroupPermission } from "src/modules/backend/auth/entities/group_permission.entity";
 import { Video } from "src/modules/backend/video/entities/video.entity";
+import { GroupPermission } from "../../group-permission/entities/group-permission.entity";
 
 @Entity()
 export class User {
@@ -20,6 +22,11 @@ export class User {
     @Column()
     avatar: string;
 
+    @Column({
+        default: true
+    })
+    isActive: boolean;
+
     @CreateDateColumn({
         type: 'timestamptz',
     })
@@ -35,7 +42,6 @@ export class User {
     auth: Auth;
 
     @ManyToMany(() => GroupPermission, (groupPermission) => groupPermission.users)
-    @JoinTable()
     groupPermissions: GroupPermission[];
 
     @OneToMany(() => Video, (video) => video.user)

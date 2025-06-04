@@ -7,8 +7,6 @@ import configuration from 'src/config/configuration';
 import { decryptPayload } from 'src/utils/token/jwt-encrypt.utils';
 import { sendDiscordNotification } from 'src/utils/notification/discord.service';
 
-
-
 @Injectable()
 export class AuthGuard implements CanActivate {
     constructor(
@@ -26,7 +24,7 @@ export class AuthGuard implements CanActivate {
 
         const request = context.switchToHttp().getRequest();
         const token = extractTokenFromHeader(request);
-
+        
         if (!token){
             // send discord notification
             await sendDiscordNotification({
@@ -47,11 +45,12 @@ export class AuthGuard implements CanActivate {
                 secret: configuration().jwt.secret,
             });
 
-
-
             const dataPayload = decryptPayload(decodeToken.data) as JwtDecryptedPayload;
             const userRoles = dataPayload.roles.split('|');
             request.user = dataPayload; // Gắn vào request
+            console.log('request.user', request.user);
+            console.log('userRoles', userRoles);
+            // request.user.roles = userRoles;
             return true;
         } catch (error) {
             // send discord notification

@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { Payload, EventPattern } from '@nestjs/microservices';
-import { SearchVideoService } from './video-search.service';
+import { SearchVideoService } from '../../shared/video/video-search.service';
 
 @Controller()
 export class VideoMicroservice {

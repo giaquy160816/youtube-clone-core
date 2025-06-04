@@ -3,14 +3,13 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { User } from './entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from '../auth/auth.module';
-import { RedisModule } from 'src/service/redis/redis.module';
+import { AuthModule } from 'src/modules/backend/auth/auth.module';
+import { GroupPermission } from 'src/modules/backend/group-permission/entities/group-permission.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User]),
+        TypeOrmModule.forFeature([User, GroupPermission]),
         forwardRef(() => AuthModule),
-        RedisModule
     ],
     controllers: [UserController],
     providers: [UserService],

@@ -6,19 +6,15 @@ import { ClientsModule } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { rabbitMqConfig } from 'src/service/rabbitMQ/rabbitmq.config';
 import { Video } from './entities/video.entity';
-import { SearchVideoService } from './video-search.service';
+import { SearchVideoService } from '../../shared/video/video-search.service';
 import { VideoController } from './video.controller';
 import { VideoMicroservice } from './video.microservice';
 import { VideoService } from './video.service';
 import { VideoUploadService } from './video-upload.service';
-import { RedisModule } from 'src/service/redis/redis.module';
-import { SyncViewsCron } from './cron/sync-views.cron';
-
 @Module({
     imports: [
         TypeOrmModule.forFeature([Video]),
         CustomElasticsearchModule,
-        RedisModule,
         ClientsModule.registerAsync([
             {
                 name: 'APP_SERVICE',
@@ -28,7 +24,7 @@ import { SyncViewsCron } from './cron/sync-views.cron';
         ]),
     ],
     controllers: [VideoController, VideoMicroservice],
-    providers: [VideoService, SearchVideoService, VideoUploadService, SyncViewsCron],
+    providers: [VideoService, SearchVideoService, VideoUploadService],
     exports: [VideoService],
 })
 export class VideoModule {}
