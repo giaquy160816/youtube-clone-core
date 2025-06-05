@@ -11,7 +11,7 @@ import { slugifyFilename } from 'src/utils/other/slug.util';
 export class CommonService {
     async uploadImage(file: Express.Multer.File): Promise<string> {
         if (!file) {
-            throw new BadRequestException('No file uploaded');
+            throw new BadRequestException('No file uploaded 1');
         }
 
         const allowedMimeTypes = [
@@ -50,7 +50,9 @@ export class CommonService {
 
         try {
             const sharp = require('sharp');
+            
             const webpBuffer = await sharp(file.buffer)
+                .rotate()
                 .resize({ width: 2000, withoutEnlargement: true })
                 .withMetadata()
                 .toFormat('webp')

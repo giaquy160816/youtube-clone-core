@@ -41,7 +41,14 @@ export class UserService {
         if (!user) {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
-        return user;
+
+        return {
+            id: user.id,
+            fullname: user.fullname,
+            phone: user.phone,
+            avatar: user.avatar,
+            email: user.email,
+        };
     }
 
     async updateMe(id: number, updateUserDto: UpdateUserDto): Promise<any> {
