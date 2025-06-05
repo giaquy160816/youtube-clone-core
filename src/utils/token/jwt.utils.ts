@@ -1,8 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
-import configuration from '../../config/configuration';
-
+import configuration from 'src/config/configuration';
 import { encryptPayload } from './jwt-encrypt.utils';
-import { parseDurationToSeconds } from '../other/parseDurationToSeconds';
+import { parseDurationToMilliseconds } from '../other/parseDurationToSeconds';
 
 export function generateTokens(jwtService: JwtService, payload: { 
     sub: number; 
@@ -10,22 +9,27 @@ export function generateTokens(jwtService: JwtService, payload: {
     fullname?: string;
     roles?: string;
 }) {
-
-
     const encrypted = encryptPayload(payload);
-    const expiresInNumber = parseDurationToSeconds(configuration().jwt.expires);
-    
+
+    // ✅ milliseconds
+    const expiresInMs = parseDurationToMilliseconds(configuration().jwt.expires);
+    const refreshInMs = parseDurationToMilliseconds(configuration().jwt.refreshExpires);
+
+    // ✅ issue JWTs
     const accessToken = jwtService.sign({ data: encrypted }, {
         secret: configuration().jwt.secret,
-        expiresIn: configuration().jwt.expires,
+        expiresIn: configuration().jwt.expires, // "1m", "1h", etc. → string OK
     });
+
     const refreshToken = jwtService.sign({ data: encrypted }, {
         secret: configuration().jwt.refresh,
         expiresIn: configuration().jwt.refreshExpires,
     });
+
     return {
         accessToken,
         refreshToken,
-        expiresIn: Math.floor(Date.now() / 1000) + expiresInNumber, // Convert to Unix timestamp
+        // ✅ trả về timestamp hết hạn đúng (milliseconds)
+        expiredAt: Date.now() + expiresInMs,
     };
-} 
+}

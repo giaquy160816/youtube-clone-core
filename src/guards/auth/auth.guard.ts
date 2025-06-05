@@ -46,11 +46,8 @@ export class AuthGuard implements CanActivate {
             });
 
             const dataPayload = decryptPayload(decodeToken.data) as JwtDecryptedPayload;
-            const userRoles = dataPayload.roles.split('|');
+            // const userRoles = dataPayload.roles.split('|');
             request.user = dataPayload; // Gắn vào request
-            console.log('request.user', request.user);
-            console.log('userRoles', userRoles);
-            // request.user.roles = userRoles;
             return true;
         } catch (error) {
             // send discord notification

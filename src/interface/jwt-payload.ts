@@ -2,5 +2,6 @@ interface JwtDecryptedPayload {
     sub: number;
     email: string;
     fullname?: string;
-    roles: string;
+    avatar?: string;
+    roles?: string;
 }

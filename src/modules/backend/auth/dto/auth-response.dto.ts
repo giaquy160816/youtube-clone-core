@@ -28,17 +28,11 @@ export class AuthResponseDto {
     accessToken: string;
 
     @ApiProperty({
-        description: 'JWT refresh token dùng để tạo mới access token khi hết hạn',
-        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-    })
-    refreshToken: string;
-
-    @ApiProperty({
         description: 'Thời gian hết hạn của access token (tính bằng giây)',
         example: 36000,
         type: Number
     })
-    expiresIn: number;
+    expiredAt: number;
 
     @ApiProperty({
         description: 'Thông tin người dùng',
@@ -79,12 +73,6 @@ export class RefreshTokenResponseDto {
         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
     })
     accessToken: string;
-
-    @ApiProperty({
-        description: 'JWT refresh token mới',
-        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-    })
-    refreshToken: string;
 
     @ApiProperty({
         description: 'Thời gian hết hạn của access token mới (tính bằng giây)',

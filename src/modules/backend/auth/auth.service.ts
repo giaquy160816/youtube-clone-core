@@ -17,6 +17,8 @@ import { LogsService } from 'src/modules/backend/logs/logs.service';
 import { LogAction } from 'src/modules/backend/logs/entities/log.entity';
 import { Request } from 'express';
 import { getDeviceInfo } from 'src/utils/device/device.utils';
+import { log } from 'console';
+import { decryptPayload } from 'src/utils/token/jwt-encrypt.utils';
 
 @Injectable()
 export class AuthService {
@@ -28,33 +30,6 @@ export class AuthService {
         private userRepository: Repository<User>,
         private logsService: LogsService,
     ) { }
-
-    async login(loginDto: LoginDto, req: Request) {
-        const { email, password } = loginDto;
-        const auth = await this.authRepository.findOne({
-            where: { email },
-            relations: ['user', 'user.groupPermissions', 'user.groupPermissions.permissions']
-        });
-        if (!auth) {
-            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
-        }
-        const isMatch = await bcrypt.compare(password, auth.password);
-        if (!isMatch) {
-            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
-        }
-
-        const deviceInfo = getDeviceInfo(req);
-        await this.logsService.createAuthLog({
-            name: `User ${auth.fullname} logged in`,
-            action: LogAction.LOGIN,
-            ...deviceInfo,
-            user_id: auth.user.id.toString(),
-            other: {
-                email: auth.email
-            }
-        });
-        return generateAuthResponse(this.jwtService, auth);
-    }
 
     async register(registerDto: RegisterDto, req: Request) {
         const { email, fullname, password } = registerDto;
@@ -92,35 +67,65 @@ export class AuthService {
         };
     }
 
-    async refreshToken(refreshTokenDto: RefreshTokenDto, req: Request) {
-        const { refreshToken } = refreshTokenDto;
-        let decoded: any;
+    async login(loginDto: LoginDto, req: Request) {
+        const { email, password } = loginDto;
+        const auth = await this.authRepository.findOne({
+            where: { email },
+            relations: ['user', 'user.groupPermissions', 'user.groupPermissions.permissions']
+        });
+        if (!auth) {
+            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
+        }
+        const isMatch = await bcrypt.compare(password, auth.password);
+        if (!isMatch) {
+            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
+        }
+
+        const deviceInfo = getDeviceInfo(req);
+        await this.logsService.createAuthLog({
+            name: `User ${auth.fullname} logged in`,
+            action: LogAction.LOGIN,
+            ...deviceInfo,
+            user_id: auth.user.id.toString(),
+            other: {
+                email: auth.email
+            }
+        });
+        return generateAuthResponse(this.jwtService, auth);
+    }
+
+    async refreshToken(refreshToken: string, req: Request) {
+        console.log('refreshToken', refreshToken);
+        let decodeToken: any;
         try {
-            decoded = this.jwtService.verify(refreshToken, {
+            decodeToken = this.jwtService.verify(refreshToken, {
                 secret: configuration().jwt.refresh,
             });
         } catch (err) {
             throw new BadRequestException('Invalid refresh token');
         }
-        const payload = { sub: decoded.sub, email: decoded.email };
-        const tokens = generateTokens(this.jwtService, payload);
+        const dataPayload = decryptPayload(decodeToken.data) as JwtDecryptedPayload;
+        const auth = await this.authRepository.findOne({
+            where: { email: dataPayload.email },
+            relations: ['user', 'user.groupPermissions', 'user.groupPermissions.permissions']
+        });
+        if (!auth) {
+            throw new BadRequestException('Invalid refresh token');
+        }
+        const tokens = generateAuthResponse(this.jwtService, auth);
 
         const deviceInfo = getDeviceInfo(req);
         await this.logsService.createAuthLog({
-            name: `Token refreshed for user ${decoded.email}`,
+            name: `Token refreshed for user ${dataPayload.email}`,
             action: LogAction.REFRESH_TOKEN,
             ...deviceInfo,
             other: {
-                userId: decoded.sub,
-                email: decoded.email
+                userId: dataPayload.sub,
+                email: dataPayload.email
             }
         });
-
         return {
-            ...tokens,
-            user: {
-                email: payload.email,
-            }
+            ...tokens
         };
     }
 

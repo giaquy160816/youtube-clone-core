@@ -1,18 +1,21 @@
 import { JwtService } from '@nestjs/jwt';
 import { generateTokens } from '../token/jwt.utils';
-import { Auth } from '../../modules/backend/auth/entities/auth.entity';
+import { Auth } from 'src/modules/backend/auth/entities/auth.entity';
 import { Repository } from 'typeorm';
-import { User } from '../../modules/backend/user/entities/user.entity';
+import { User } from 'src/modules/backend/user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { generateRandomPassword } from '../token/jwt-encrypt.utils';
+import { float } from '@elastic/elasticsearch/lib/api/types';
 
 export interface AuthResponse {
     accessToken: string;
     refreshToken: string;
+    expiredAt: float;
     user: {
         email: string;
         fullname: string;
         avatar: string;
+        phone: string;
         roles: string[];
     };
 }
@@ -37,13 +40,9 @@ export const generateAuthResponse = (
         )
     );
 
-    
-
     const payload = {
         sub: user.id,
         email: user.email,
-        fullname: user.fullname,
-        roles: roles.join('|')
     };
 
     const tokens = generateTokens(jwtService, payload);
@@ -53,6 +52,7 @@ export const generateAuthResponse = (
         user: {
             email: auth.email,
             fullname: auth.fullname,
+            phone: user.phone,
             avatar: user.avatar,
             roles: roles
         }

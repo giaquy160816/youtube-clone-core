@@ -1,18 +1,46 @@
-import { Controller, Post, Body, Headers, UnauthorizedException, Req } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Post, Body, Headers, UnauthorizedException, Req, Res, Get } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from 'src/decorators/public.decorator';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiHeader } from '@nestjs/swagger';
-import { AuthResponseDto, RegisterResponseDto, RefreshTokenResponseDto } from './dto/auth-response.dto';
+import { AuthResponseDto, RegisterResponseDto } from './dto/auth-response.dto';
 
 @ApiTags('Backend / Auth')
 @Controller()
 @Public()
 export class AuthController {
     constructor(private readonly authService: AuthService) { }
+
+
+    @Get('refresh-token')
+    @ApiOperation({ summary: 'Làm mới access token. Bạn không cần truyền gì backend sẽ tự động lấy thông tin từ cookie để xác thực login tiếp theo' })
+    @ApiResponse({
+        status: 200,
+        description: 'Làm mới token thành công',
+        type: AuthResponseDto
+    })
+    async refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+        const token = req.cookies['refresh_token'];
+        console.log('token', token);
+        if (!token) throw new UnauthorizedException('Missing refresh token');
+        const { accessToken, refreshToken, expiredAt, user } = await this.authService.refreshToken(token, req);
+
+        res.cookie('refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: true, // nếu dùng HTTPS
+            sameSite: 'lax',
+            path: '/backend/auth/refresh-token',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+        });
+        return {
+            accessToken,
+            expiredAt,
+            user
+        };
+    }
 
     @Post('login')
     @ApiOperation({ summary: 'Đăng nhập bằng email và password' })
@@ -33,8 +61,21 @@ export class AuthController {
         description: 'Đăng nhập thành công',
         type: AuthResponseDto
     })
-    async login(@Body() loginDto: LoginDto, @Req() req: Request) {
-        return this.authService.login(loginDto, req);
+    async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response, @Req() req: Request) {
+        const { refreshToken, accessToken, user, expiredAt } = await this.authService.login(loginDto, req);
+        res.cookie('refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: true, // nếu dùng HTTPS
+            sameSite: 'lax',
+            path: '/backend/auth/refresh-token',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+        });
+
+        return {
+            accessToken,
+            expiredAt,
+            user
+        };
     }
 
     @Post('login-google-firebase')
@@ -82,7 +123,7 @@ export class AuthController {
     async loginSupabase(@Body('token') token: string, @Req() req: Request) {
         return this.authService.loginSupabase(token, req);
     }
-    
+
     @Post('register')
     @ApiOperation({ summary: 'Đăng ký tài khoản mới' })
     @ApiBody({
@@ -107,25 +148,21 @@ export class AuthController {
         return this.authService.register(registerDto, req);
     }
 
-    @Post('refresh-token')
-    @ApiOperation({ summary: 'Làm mới access token' })
-    @ApiBody({
-        type: RefreshTokenDto,
-        description: 'Refresh token',
-        examples: {
-            example1: {
-                value: {
-                    refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-                }
-            }
-        }
-    })
+
+    @Post('logout')
+    @ApiOperation({ summary: 'Đăng xuất' })
     @ApiResponse({
         status: 200,
-        description: 'Làm mới token thành công',
-        type: RefreshTokenResponseDto
+        description: 'Đăng xuất thành công',
     })
-    async refreshToken(@Body() refreshTokenDto: RefreshTokenDto, @Req() req: Request) {
-        return this.authService.refreshToken(refreshTokenDto, req);
+    logout(@Res({ passthrough: true }) res: Response) {
+        res.clearCookie('refresh_token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            path: '/backend/auth/refresh-token',
+        });
+
+        return { message: 'Logged out successfully' };
     }
 } 
