@@ -84,6 +84,14 @@ export class PermissionService {
     }
 
     async update(id: string, updatePermissionDto: UpdatePermissionDto) {
+        if (updatePermissionDto.role) {
+            const permissionExist = await this.permissionRepository.findOne({
+                where: { role: updatePermissionDto.role }
+            });
+            if (permissionExist && permissionExist.id !== id) {
+                throw new BadRequestException('Permission already exists');
+            }
+        }
         const permission = await this.findOne(id);
         Object.assign(permission, updatePermissionDto);
         await this.permissionRepository.save(permission);

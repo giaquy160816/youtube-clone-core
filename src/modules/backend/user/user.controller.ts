@@ -71,7 +71,7 @@ export class UserController {
                     phone: '0123456789',
                     avatar: 'https://example.com/avatar.jpg',
                     isActive: true,
-                    groupPermission: [1, 2, 3]
+                    groupPermissionId: 1
                 }
             }
         }
@@ -87,9 +87,7 @@ export class UserController {
                 avatar: 'https://example.com/avatar.jpg',
                 email: 'user@example.com',
                 status: 'active',
-                groupPermission: [1, 2, 3],
-                createdAt: '2024-03-20T10:00:00Z',
-                updatedAt: '2024-03-20T10:00:00Z'
+                groupPermissionId: 1,
             }
         }
     })

@@ -1,12 +1,12 @@
 services:
   postgres:
     image: postgres:14
-    container_name: postgres-db
+    container_name: postgres-youtube
     restart: unless-stopped
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydatabase
+      POSTGRES_USER: youtubeuser
+      POSTGRES_PASSWORD: youtubepassword
+      POSTGRES_DB: youtube_db
     ports:
       - "5432:5432"
     volumes:

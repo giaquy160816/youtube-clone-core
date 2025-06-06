@@ -1,9 +1,9 @@
 // src/modules/backend/user/entities/user.entity.ts
 
-import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToMany, JoinTable } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToMany, JoinTable, ManyToOne } from "typeorm";
 import { Auth } from 'src/modules/backend/auth/entities/auth.entity';
 import { Video } from "src/modules/backend/video/entities/video.entity";
-import { GroupPermission } from "../../group-permission/entities/group-permission.entity";
+import { GroupPermission } from "src/modules/backend/group-permission/entities/group-permission.entity";
 
 @Entity()
 export class User {
@@ -41,8 +41,10 @@ export class User {
     @JoinColumn()
     auth: Auth;
 
-    @ManyToMany(() => GroupPermission, (groupPermission) => groupPermission.users)
-    groupPermissions: GroupPermission[];
+    // Mỗi user thuộc 1 nhóm
+    @ManyToOne(() => GroupPermission, group => group.users)
+    @JoinColumn()
+    groupPermission: GroupPermission;
 
     @OneToMany(() => Video, (video) => video.user)
     videos: Video[];

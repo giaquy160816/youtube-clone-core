@@ -4,9 +4,8 @@ import { IsOptional, IsString, MaxLength, Matches, IsArray, IsNumber } from 'cla
 
 export class UpdateUserDto extends OmitType(PartialType(CreateUserDto), ['email'] as const) {
     @IsOptional()
-    @IsArray()
-    @IsNumber({}, { each: true })
-    groupPermissionIds?: number[];
+    @IsNumber()
+    groupPermissionId?: number;
 }
 
 export class UpdateMeUserDto {

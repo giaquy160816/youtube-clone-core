@@ -6,7 +6,6 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
 import configuration from 'src/config/configuration';
 import { generateTokens } from 'src/utils/token/jwt.utils';
 import { User } from 'src/modules/backend/user/entities/user.entity';
@@ -71,7 +70,7 @@ export class AuthService {
         const { email, password } = loginDto;
         const auth = await this.authRepository.findOne({
             where: { email },
-            relations: ['user', 'user.groupPermissions', 'user.groupPermissions.permissions']
+            relations: ['user', 'user.groupPermission', 'user.groupPermission.permissions']
         });
         if (!auth) {
             throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);

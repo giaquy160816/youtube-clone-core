@@ -43,7 +43,7 @@ export class UserService {
         }
 
         return {
-            id: user.id,
+            // id: user.id,
             fullname: user.fullname,
             phone: user.phone,
             avatar: user.avatar,
@@ -85,7 +85,7 @@ export class UserService {
     }
 
     async update(id: number, updateUserDto: UpdateUserDto): Promise<any> {
-        const user = await this.userRepository.findOne({ where: { id }, relations: ['groupPermissions'] });
+        const user = await this.userRepository.findOne({ where: { id }});
         if (!user) {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
@@ -94,13 +94,16 @@ export class UserService {
         }
 
         // Xử lý cập nhật groupPermissions nếu có
-        if (updateUserDto.groupPermissionIds) {
-            const groupPermissions = await this.groupPermissionRepository.findByIds(updateUserDto.groupPermissionIds);
-            user.groupPermissions = groupPermissions;
+        if (updateUserDto.groupPermissionId) {
+            const groupPermission = await this.groupPermissionRepository.findOne({ where: { id: updateUserDto.groupPermissionId } });
+            if (!groupPermission) {
+                throw new HttpException('Group permission not found', HttpStatus.NOT_FOUND);
+            }
+            user.groupPermission = groupPermission;
         }
 
         // Xóa groupPermissionIds khỏi DTO để không bị save vào cột không tồn tại
-        const { groupPermissionIds, ...rest } = updateUserDto;
+        const { groupPermissionId, ...rest } = updateUserDto;
 
         const updatedUser = await this.userRepository.save({ ...user, ...rest });
         if (!updatedUser) {

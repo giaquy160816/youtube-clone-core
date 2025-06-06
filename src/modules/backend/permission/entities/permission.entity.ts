@@ -14,17 +14,17 @@ export class Permission {
     @Column(
         {
             unique: true,
-            nullable: false
+            nullable: true
         }
     )
     role: string;
 
-    @Column({ 
+    @Column({
         default: 0,
     })
     parent: number;
 
-    
+
     @Column({ nullable: true })
     description: string;
 
@@ -35,6 +35,5 @@ export class Permission {
     updatedAt: Date;
 
     @ManyToMany(() => GroupPermission, (groupPermission) => groupPermission.permissions)
-    @JoinTable()
     groupPermissions: GroupPermission[];
-} 
+}

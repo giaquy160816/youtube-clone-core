@@ -11,7 +11,10 @@ import { SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.use(cookieParser());
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+    }));
     app.useGlobalInterceptors(new TimeoutInterceptor());
     // Allow all origins for CORS
 

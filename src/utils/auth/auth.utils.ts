@@ -34,15 +34,14 @@ export const generateAuthResponse = (
     const user = auth.user;
     const roles = Array.from(
         new Set(
-            user.groupPermissions.flatMap(gp =>
-                gp.permissions.map(p => p.role)
-            )
+            (user.groupPermission?.permissions?.map(p => p.role).filter(role => role != null) || [])
         )
     );
 
     const payload = {
         sub: user.id,
         email: user.email,
+        roles: roles.join('|')
     };
 
     const tokens = generateTokens(jwtService, payload);

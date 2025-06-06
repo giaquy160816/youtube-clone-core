@@ -71,6 +71,10 @@ export class AuthController {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
         });
 
+        console.log('accessToken', accessToken);
+        console.log('expiredAt', expiredAt);
+        console.log('user', user);
+
         return {
             accessToken,
             expiredAt,

@@ -32,8 +32,20 @@ export class VideoService {
     
     async findOne(id: number): Promise<VideoResponse> {
         const video = await this.videoCoreService.findByIdOrFail(Number(id));
+
+        const videoDetail = {
+            id: video.id,
+            title: video.title,
+            description: video.description || '',
+            image: video.image || '',
+            path: video.path || '',
+            views: video.view,
+            author: video.user.fullname || 'No Name',
+            avatar: video.user.avatar,
+            createdAt: formatDistance(video.createdAt, new Date(), { addSuffix: true, locale: vi }),
+        };
         return {
-            data: video || null,
+            data: videoDetail,
             message: 'Video found',
             status: 1,
         };
