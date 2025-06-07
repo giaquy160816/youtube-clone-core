@@ -10,7 +10,6 @@ import configuration from 'src/config/configuration';
 import { generateTokens } from 'src/utils/token/jwt.utils';
 import { User } from 'src/modules/backend/user/entities/user.entity';
 import axios from 'axios';
-import * as adminGG from 'firebase-admin';
 import { generateAuthResponse, createNewUser } from 'src/utils/auth/auth.utils';
 import { LogsService } from 'src/modules/backend/logs/logs.service';
 import { LogAction } from 'src/modules/backend/logs/entities/log.entity';
@@ -128,30 +127,6 @@ export class AuthService {
         };
     }
 
-    async loginGG(token: string, req: Request) {
-        if (!token) {
-            throw new BadRequestException('No token provided');
-        }
-        try {
-            const decoded = await adminGG.auth().verifyIdToken(token);
-            const deviceInfo = getDeviceInfo(req);
-            await this.logsService.createAuthLog({
-                name: `Google login attempt for ${decoded.email}`,
-                action: LogAction.LOGIN,
-                ...deviceInfo,
-                other: {
-                    email: decoded.email,
-                    provider: 'google'
-                }
-            });
-            return {
-                message: 'Token is valid',
-            };
-        } catch (err) {
-            throw new BadRequestException('Invalid token');
-        }
-    }
-
     async loginSupabase(accessToken: string, req: Request) {
         try {
             const res = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
@@ -159,7 +134,6 @@ export class AuthService {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-            console.log('res', res);
 
             const data = res.data as {
                 email: string;
@@ -214,22 +188,13 @@ export class AuthService {
                         provider: 'google'
                     }
                 });
-
-                const payload = {
-                    sub: authNew.user.id,
-                    email: authNew.email,
-                    fullname: authNew.fullname,
-                    roles: ''
-                };
-                const tokens = generateTokens(this.jwtService, payload);
-                return {
-                    ...tokens,
-                    user: {
-                        email: authNew.email,
-                        fullname: authNew.fullname,
-                        avatar: authNew.user.avatar
-                    }
-                };
+                const existingAuth = await this.authRepository.findOne({
+                    where: { email },
+                    relations: ['user', 'user.groupPermission', 'user.groupPermission.permissions']
+                });
+                if (existingAuth) {
+                    return generateAuthResponse(this.jwtService, existingAuth);
+                }
             }
         } catch (error) {
             console.error('❌ Google token invalid:', error?.response?.data || error.message);

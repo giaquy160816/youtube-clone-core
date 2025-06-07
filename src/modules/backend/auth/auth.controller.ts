@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Headers, UnauthorizedException, Req, Res, Get } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException, Req, Res, Get } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -71,39 +71,11 @@ export class AuthController {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
         });
 
-        console.log('accessToken', accessToken);
-        console.log('expiredAt', expiredAt);
-        console.log('user', user);
-
         return {
             accessToken,
             expiredAt,
             user
         };
-    }
-
-    @Post('login-google-firebase')
-    @ApiOperation({ summary: 'Đăng nhập bằng Google thông qua Firebase' })
-    @ApiHeader({
-        name: 'authorization',
-        description: 'Firebase token',
-        required: true,
-        schema: {
-            type: 'string',
-            example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-        }
-    })
-    @ApiResponse({
-        status: 200,
-        description: 'Đăng nhập thành công',
-        type: AuthResponseDto
-    })
-    async loginGG(@Headers('authorization') authHeader: string, @Req() req: Request) {
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            throw new UnauthorizedException('Invalid authorization header format');
-        }
-        const token = authHeader.split(' ')[1];
-        return this.authService.loginGG(token, req);
     }
 
     @Post('login-google-supabase')
@@ -124,8 +96,25 @@ export class AuthController {
         description: 'Đăng nhập thành công',
         type: AuthResponseDto
     })
-    async loginSupabase(@Body('token') token: string, @Req() req: Request) {
-        return this.authService.loginSupabase(token, req);
+    async loginSupabase(@Body('token') token: string, @Res({ passthrough: true }) res: Response, @Req() req: Request) {
+        const resLogin = await this.authService.loginSupabase(token, req);
+        if (!resLogin) {
+            throw new UnauthorizedException('Login failed');
+        }
+        const { accessToken, expiredAt, user } = resLogin;
+        res.cookie('refresh_token', resLogin.refreshToken, {
+            httpOnly: true,
+            secure: true, // nếu dùng HTTPS
+            sameSite: 'lax',
+            path: '/backend/auth/refresh-token',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+        });
+
+        return {
+            accessToken,
+            expiredAt,
+            user
+        };
     }
 
     @Post('register')
