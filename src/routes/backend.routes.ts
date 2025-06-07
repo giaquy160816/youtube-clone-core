@@ -7,6 +7,7 @@ import { TokenModule } from 'src/modules/backend/token/token.module';
 import { CommonModule } from 'src/modules/backend/common/common.module';
 import { PermissionModule } from 'src/modules/backend/permission/permission.module';
 import { GroupPermissionModule } from 'src/modules/backend/group-permission/group-permission.module';
+import { AppScheduleModule } from 'src/schedule/schedule.module';
 
 export const backendRoutes: Routes = [
     { path: 'backend/user', module: UserModule },
@@ -28,4 +29,5 @@ export const backendModules = [
     VideoModule,
     TokenModule,
     SettingModule,
+    AppScheduleModule,
 ];

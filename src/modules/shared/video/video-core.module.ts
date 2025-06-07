@@ -7,7 +7,6 @@ import { VideoCoreService } from './video-core.service';
 import { SearchVideoService } from './video-search.service';
 import { CustomElasticsearchModule } from 'src/service/elasticsearch/elasticsearch.module';
 import { RedisModule } from 'src/service/redis/redis.module';
-import { SyncViewsCron } from '../../backend/video/cron/sync-views.cron';
 
 @Module({
     imports: [
@@ -15,7 +14,7 @@ import { SyncViewsCron } from '../../backend/video/cron/sync-views.cron';
         CustomElasticsearchModule,
         RedisModule
     ],
-    providers: [VideoCoreService, SearchVideoService, SyncViewsCron],
+    providers: [VideoCoreService, SearchVideoService],
     exports: [VideoCoreService],
 })
 export class VideoCoreModule { }
