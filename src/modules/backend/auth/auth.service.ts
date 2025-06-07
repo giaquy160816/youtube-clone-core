@@ -159,6 +159,7 @@ export class AuthService {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
+            console.log('res', res);
 
             const data = res.data as {
                 email: string;
@@ -178,7 +179,7 @@ export class AuthService {
             // Tìm user hoặc tạo mới
             const existingAuth = await this.authRepository.findOne({
                 where: { email },
-                relations: ['user', 'user.groupPermissions', 'user.groupPermissions.permissions']
+                relations: ['user', 'user.groupPermission', 'user.groupPermission.permissions']
             });
 
             if (existingAuth) {
