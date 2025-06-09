@@ -1,22 +1,19 @@
+# docker-compose.production.yml
 services:
-  dev:
+  runtime:
     build:
       context: .
       dockerfile: Dockerfile
-      target: dev
-    container_name: nestjs-dev
+      target: runtime
+    container_name: nestjs-runtime
     ports:
       - "3002:3002"
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       - postgres
       - redis
       - elasticsearch
       - rabbitmq
     environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
+      NODE_ENV: production
     env_file:
-      - .env.development
+      - .env.production

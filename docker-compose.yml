@@ -1,16 +1,18 @@
+# docker-compose.yml
 services:
   postgres:
     image: postgres:14
-    container_name: postgres-youtube
+    container_name: postgres-app
     restart: unless-stopped
     environment:
-      POSTGRES_USER: youtubeuser
-      POSTGRES_PASSWORD: youtubepassword
-      POSTGRES_DB: youtube_db
+      POSTGRES_USER: app_postgres_user
+      POSTGRES_PASSWORD: app_postgres_password
+      POSTGRES_DB: app_postgres_db
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - /Volumes/Data/docker/postgres:/var/lib/postgresql/data
+      # - /var/vps-data/postgres:/var/lib/postgresql/data
 
   redis:
     image: redis:7.2-alpine
@@ -19,7 +21,8 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - /Volumes/Data/docker/redis:/data
+      # - /var/vps-data/redis:/data
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
@@ -32,7 +35,8 @@ services:
     ports:
       - "9200:9200"
     volumes:
-      - es_data:/usr/share/elasticsearch/data
+      - /Volumes/Data/docker/elasticsearch:/usr/share/elasticsearch/data
+      # - /var/vps-data/elasticsearch:/usr/share/elasticsearch/data
     restart: unless-stopped
     ulimits:
       memlock:
@@ -56,33 +60,33 @@ services:
     container_name: rabbitmq
     restart: unless-stopped
     ports:
-      - "5672:5672"     # AMQP protocol
-      - "15672:15672"   # Web UI
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: rabbituser
       RABBITMQ_DEFAULT_PASS: rabbitpassword
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - /Volumes/Data/docker/rabbitmq:/var/lib/rabbitmq
+      # - /var/vps-data/rabbitmq:/var/lib/rabbitmq
 
-  runtime:
+  dev:
     build:
       context: .
       dockerfile: Dockerfile
-      target: runtime
-    container_name: nestjs-runtime
+      target: dev
+    container_name: nestjs-dev
     ports:
       - "3002:3002"
+    volumes:
+      - .:/app
+      - /app/node_modules
     depends_on:
       - postgres
       - redis
       - elasticsearch
       - rabbitmq
     environment:
-      NODE_ENV: production
-
-      
-volumes:
-  postgres_data:
-  redis_data:
-  es_data:
-  rabbitmq_data:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    env_file:
+      - .env.development

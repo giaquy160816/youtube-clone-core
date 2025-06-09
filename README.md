@@ -1,67 +1,76 @@
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <a href="https://nestjs.com/" target="blank">
+    <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
+  </a>
 </p>
 
-## Description
+# NestJS YouTube Clone
 
-Project clone youtube with nestjs frame
-
-## 🐳 Docker Setup Guide for Local Development
-
-This project uses **Docker Compose** to run NestJS in both development (`nestjs-dev`) and production (`nestjs-runtime`) modes. It also includes essential services: **PostgreSQL**, **Redis**, **Elasticsearch**, **Kibana**, and **RabbitMQ**.
+> A full-featured backend project built with **NestJS** and Docker, replicating the core logic of a YouTube-style platform.
 
 ---
 
-### 🧱 Project Structure
+## 🐳 Docker Setup for Development & Production
+
+This project uses **multi-stage Docker builds** and `docker-compose` to manage both development (`nestjs-dev`) and production (`nestjs-runtime`) environments. It also includes essential services:
+
+- ✅ PostgreSQL
+- ✅ Redis
+- ✅ Elasticsearch + Kibana
+- ✅ RabbitMQ
+
+---
+
+## 🧱 Project Structure
 
 ```bash
 .
-├── Dockerfile                      # Multi-stage build: builder, dev, runtime
-├── docker-compose.yml              # Core services (DB, Redis, etc.)
-├── docker-compose.dev.yml         # Dev-specific service (nestjs-dev)
-├── .env.development               # Environment variables for dev mode
-└── src/
+├── Dockerfile                      # Multi-stage build: builder → dev → runtime
+├── docker-compose.yml             # Core services (Postgres, Redis, etc.)
+├── docker-compose.dev.yml         # Dev service: nestjs-dev (hot reload)
+├── docker-compose.dev.yml    # Overrides for local dev (mount local node_modules)
+├── docker-compose.production.yml  # Runtime-only service for production
+├── .env.development               # Dev environment variables
+├── .env.production                # Production environment variables
+└── src/                           # Your NestJS app source code
 ```
 
 ---
 
-### 🚀 Running Locally
+## 🚀 Getting Started (Development)
 
-#### ✅ First-time setup
-
-Build dev environment (NestJS + services):
+### ✅ First-time setup
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml build dev
+docker-compose -f docker-compose.yml build dev
 ```
 
-#### ▶️ Start development server with hot reload:
+### ▶️ Run NestJS in Dev Mode (with hot reload)
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up dev
+docker-compose -f docker-compose.yml up dev
 ```
 
-- Dev API available at: http://localhost:3002
-- Uses `ts-node-dev` for automatic reload on code change
+- Dev API available at: [http://localhost:3002](http://localhost:3002)
+- Uses `ts-node-dev` and hot reload
+- Mounted source: `.:/app`
+- Uses local `./node_modules` for faster install & easier reset
 
-> 💡 To watch logs in real-time:  
-> `docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f dev`
+### ⏹ Stop services
 
-#### ⏹ Stop services
+Stop all services:
 
-Stop all services (including databases, message brokers, etc.):  
 ```bash
 docker-compose down
 ```
 
-Or stop only NestJS dev:  
+Stop only NestJS dev:
+
 ```bash
 docker-compose stop nestjs-dev
 ```
 
-#### 🔄 When you update `.env.development`
-
-Docker won't reload env vars automatically. Do this instead:
+### 🔄 Reload env vars if `.env.development` changed
 
 ```bash
 docker-compose stop nestjs-dev
@@ -70,20 +79,20 @@ docker-compose up dev
 
 ---
 
-### 🏗 Production Runtime (Optional)
+## 🏗 Running in Production (Optional)
 
-To build and run production-ready container (`nestjs-runtime`):
+### 🛠 Build and run runtime container
 
 ```bash
-docker-compose build runtime
-docker-compose up -d runtime
+docker-compose -f docker-compose.yml -f docker-compose.production.yml build runtime
+docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d runtime
 ```
 
-- Runs at: http://localhost:3001
-- Uses compiled `dist/` from Dockerfile multi-stage build
-- Uses `.env.production` internally
+- Production API: [http://localhost:3002](http://localhost:3002)
+- Uses compiled `dist/` from multi-stage Dockerfile
+- Loads `.env.production` for config
 
-To stop only runtime:
+### ⏹ Stop runtime only
 
 ```bash
 docker-compose stop nestjs-runtime
@@ -91,75 +100,117 @@ docker-compose stop nestjs-runtime
 
 ---
 
-### 🧪 Useful Docker Commands
+## 📂 Persistent Data with Bind Mounts
+
+> 💡 Unlike default Docker volumes, this setup **mounts host folders** to persist data even after volume deletion or re-creation.
+
+### Suggested paths (on VPS/Linux)
+
+| Service       | Host Path                    | Container Path                           |
+|---------------|------------------------------|-------------------------------------------|
+| PostgreSQL    | `/var/vps-data/postgres`     | `/var/lib/postgresql/data`               |
+| Redis         | `/var/vps-data/redis`        | `/data`                                   |
+| Elasticsearch | `/var/vps-data/elasticsearch`| `/usr/share/elasticsearch/data`          |
+| RabbitMQ      | `/var/vps-data/rabbitmq`     | `/var/lib/rabbitmq`                      |
+
+Create directories and set permission (example):
 
 ```bash
-# Check running containers
-docker ps
-
-# Show logs for NestJS dev
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f dev
-
-# Clean up all stopped containers & volumes
-docker system prune -af --volumes
-
-# Rebuild everything (force clean)
-docker-compose down --volumes
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache
+sudo mkdir -p /var/vps-data/{postgres,redis,elasticsearch,rabbitmq}
+sudo chown -R 999:999 /var/vps-data/postgres  # UID 999 for postgres user
 ```
 
 ---
 
-### 🛠 When you need to install a new library, follow these steps:
-
-#### ✅ 1. Dừng và xóa container
+## 🧪 Useful Docker Commands
 
 ```bash
-# -f: ép dừng container nếu đang chạy
+# List containers
+docker ps
+
+# Follow logs for NestJS dev
+docker-compose -f docker-compose.yml logs -f dev
+
+# Clean up all unused resources
+docker system prune -af --volumes
+
+# Rebuild from scratch
+docker-compose down --volumes
+docker-compose -f docker-compose.yml build --no-cache
+```
+
+---
+
+## 🛠 When Installing New Dependencies
+
+### ✅ 1. Stop container
+
+```bash
 docker rm -f nestjs-dev
 ```
 
-#### ✅ 2. Xóa image
+### ✅ 2. Remove image (optional)
 
 ```bash
 docker rmi nestjs-dev:latest
-
-#Xoá những images đang không chạy
 docker image prune -a -f
 ```
 
-#### ✅ 3. Xóa volume liên quan (nếu cần)
+### ✅ 3. Clear local caches (optional)
 
 ```bash
-# Kiểm tra volume nào có tên liên quan nestjs
-docker volume ls
-
-# Sau đó xóa:
-docker volume rm <volume-name>
-```
-
-#### ✅ 4. Xóa thư mục node_modules / file package-lock.json dưới local
-
-```bash
-rm -rf node_modules    
+rm -rf node_modules
 rm -f package-lock.json
 ```
 
-#### ✅ 5. Tiến hành build lại container dev - runtime 
+### ✅ 4. Rebuild container
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml build dev    
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up dev
+docker-compose -f docker-compose.yml build dev
+docker-compose -f docker-compose.yml up dev
 ```
 
 ---
 
-## 🚀 Project setup local when finish when docker run success
+## 📦 Installing Locally (optional)
+
+If you want to install locally without Docker:
 
 ```bash
-$ npm install
+npm install
 ```
+
+---
+
+## 💡 Final Notes
+
+- ✅ This setup **prevents data loss** using bind-mounted volumes instead of named volumes.
+- 🔐 Ensure sensitive data (JWT secret, DB password) is managed via `.env` securely.
+- 🧩 Supports both `nestjs-dev` (hot reload with local node_modules) and `nestjs-runtime` (dist build).
+- 🛡️ Docker host folders are safe from volume pruning and ideal for production backups.
 
 ---
 
 Happy coding! 🚀
+---
+
+## ⚙️ Docker Shortcut Script
+
+You can use the included `docker-shortcuts.sh` for easier dev workflow:
+
+### 🧪 Setup (first time)
+
+```bash
+chmod +x docker-shortcuts.sh
+```
+
+### 🚀 Usage
+
+```bash
+./docker-shortcuts.sh dev       # Start dev server with hot reload
+./docker-shortcuts.sh stop      # Stop dev container
+./docker-shortcuts.sh restart   # Restart dev container
+./docker-shortcuts.sh logs      # Follow dev logs in real-time
+```
+
+> ℹ️ This script automatically includes `docker-compose.dev.yml` for local development

@@ -11,8 +11,6 @@ import { join } from 'path';
 import * as mime from 'mime-types';
 
 // Libaries Third Party
-import { initializeApp } from 'firebase-admin/app'; // kết nối firebase
-import { credential } from 'firebase-admin'; // kết nối firebase
 import { createKeyv } from '@keyv/redis'; // kết nối redis
 import { rabbitMqConfig } from './service/rabbitMQ/rabbitmq.config'; // kết nối rabbitmq
 import { SupabaseService } from './service/supabase/supabase.service'; // kết nối supabase
@@ -127,9 +125,6 @@ import { ClientsModule } from '@nestjs/microservices';
 })
 export class AppModule implements NestModule {
     constructor() {
-        const app = initializeApp({
-            credential: credential.cert('src/keys/firebase-admin-key.json'),
-        });
         console.log('AppModule constructor');
     }
     configure(consumer: MiddlewareConsumer) {

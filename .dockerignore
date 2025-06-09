@@ -1,6 +1,7 @@
 # Bỏ thư mục build và cache
 dist
 node_modules
+uploads
 .cache
 
 # Bỏ các file cấu hình local, môi trường

@@ -80,8 +80,37 @@ export class VideoCoreService {
             if (count > 0) {
                 await this.videoRepository.increment({ id: videoId }, 'view', count);
                 await this.redisService.del(key);
+                await this.sysVideoToES(videoId);
                 console.log(`Synced ${count} views for video ${videoId}`);
             }
         }
+    }
+
+    async sysVideoToES(id: number) {
+        const video = await this.videoRepository.findOne({
+            where: { id },
+            relations: ['user'],
+        });
+        if (!video) {
+            throw new HttpException('Video not found', HttpStatus.NOT_FOUND);
+        }
+        const formattedVideo: VideoDocument = {
+            id: video.id,
+            title: video.title,
+            description: video.description,
+            image: video.image,
+            isActive: video.isActive,
+            path: video.path,
+            view: video.view,
+            user_id: video.user?.id,
+            user_fullname: video.user?.fullname,
+            user_avatar: video.user?.avatar,
+            createdAt: video.createdAt.toISOString(),
+        };
+
+        await this.searchVideoService.indexVideo('videos', formattedVideo);
+        return {
+            message: 'Sys video to ES successfully'
+        };
     }
 }

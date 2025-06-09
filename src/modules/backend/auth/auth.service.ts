@@ -105,7 +105,7 @@ export class AuthService {
         const dataPayload = decryptPayload(decodeToken.data) as JwtDecryptedPayload;
         const auth = await this.authRepository.findOne({
             where: { email: dataPayload.email },
-            relations: ['user', 'user.groupPermissions', 'user.groupPermissions.permissions']
+            relations: ['user', 'user.groupPermission', 'user.groupPermission.permissions']
         });
         if (!auth) {
             throw new BadRequestException('Invalid refresh token');

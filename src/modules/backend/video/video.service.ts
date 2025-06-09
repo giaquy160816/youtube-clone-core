@@ -137,4 +137,22 @@ export class VideoService {
         };
     }
 
+    async findAllByUserId(userId: number, page = 1, limit = 2): Promise<{ data: Video[]; total: number; page: number; limit: number }> {
+        const [data, total] = await this.videoRepository.findAndCount({
+            where: { user: { id: userId } },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+        return { data, total, page, limit };
+    }
+
+    async findById(id: number): Promise<Video> {
+        const video = await this.videoRepository.findOne({
+            where: { id },
+        });
+        if (!video) {
+            throw new HttpException('Video not found', HttpStatus.NOT_FOUND);
+        }
+        return video;
+    }
 }

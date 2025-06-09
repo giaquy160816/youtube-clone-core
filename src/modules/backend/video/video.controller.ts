@@ -7,17 +7,14 @@ import {
     Get,
     Delete,
     Query,
-    UseInterceptors,
-    UploadedFile,
     BadRequestException,
     Request,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { VideoService } from './video.service';
 import { VideoUploadService } from './video-upload.service';
-import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
 
 
 @ApiTags('Backend / Video')
@@ -28,48 +25,9 @@ export class VideoController {
         private readonly videoService: VideoService,
         private readonly videoUploadService: VideoUploadService,
     ) { }
-
-    @Post('upload')
-    @UseInterceptors(FileInterceptor('file'))
-    @ApiOperation({ summary: 'Upload video file' })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                file: {
-                    type: 'string',
-                    format: 'binary',
-                    description: 'File video cần upload (chỉ hỗ trợ định dạng mp4)'
-                }
-            }
-        }
-    })
-    @ApiResponse({
-        status: 200,
-        description: 'Upload thành công',
-        schema: {
-            type: 'object',
-            properties: {
-                path: {
-                    type: 'string',
-                    example: '/uploads/videos/example.mp4',
-                    description: 'Đường dẫn đến file video đã upload'
-                }
-            }
-        }
-    })
-    async uploadVideo(@UploadedFile() file: Express.Multer.File) {
-        if (!file) {
-            throw new BadRequestException('No file uploaded');
-        }
-        
-        const filePath = await this.videoUploadService.uploadVideo(file);
-        return {
-            path: filePath
-        };
-    }
     
     @Post('reindex')
+    @ApiExcludeEndpoint ()
     @ApiOperation({ summary: 'Cập nhật toàn bộ video từ DB vào ES' })
     @ApiResponse({
         status: 200,
@@ -228,6 +186,30 @@ export class VideoController {
     })
     update(@Param('id') id: number, @Body() updateVideoDto: UpdateVideoDto) {
         return this.videoService.update(id, updateVideoDto);
+    }
+
+    @Get('me')
+    @ApiOperation({ summary: 'Tìm kiếm video' })
+    @ApiResponse({
+        status: 200,
+        description: 'Tìm kiếm video thành công',
+    })
+    findAllByUserId(@Request() req, @Query('page') page: number = 1, @Query('limit') limit: number = 10) {
+        const userId = Number(req.user?.sub);
+        if (!userId || isNaN(userId)) {
+            throw new BadRequestException('Invalid user id in token');
+        }
+        return this.videoService.findAllByUserId(userId, Number(page), Number(limit));
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: 'Lấy video theo id' })
+    @ApiResponse({
+        status: 200,
+        description: 'Lấy video theo id thành công',
+    })
+    findById(@Param('id') id: number) {
+        return this.videoService.findById(id);
     }
 
     @Get()

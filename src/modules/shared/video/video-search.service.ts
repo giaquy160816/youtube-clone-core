@@ -56,7 +56,6 @@ export class SearchVideoService implements OnApplicationBootstrap {
 
 
     async indexVideo(index: string, document: any) {
-        console.log('indexVideo', index, document);
         return await this.searchService.index({
             index: 'videos',
             id: document.id.toString(), // ✅ dùng id làm khóa
@@ -146,14 +145,6 @@ export class SearchVideoService implements OnApplicationBootstrap {
     async countVideosInES(): Promise<number> {
         const res = await this.searchService.count({ index: 'videos' });
         return res.count;
-    }
-
-    async reindexAllVideos(videos: any[]) {
-        console.log(`🔄 Đang reindex ${videos.length} video...`);
-        for (const video of videos) {
-            await this.indexVideo('videos', video);
-        }
-        console.log('✅ Hoàn tất reindex toàn bộ video.');
     }
 
     async deleteVideoFromIndex(videoId: number) {

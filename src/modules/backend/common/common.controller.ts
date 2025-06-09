@@ -1,12 +1,13 @@
 import { BadRequestException, Controller, Post, UploadedFile, UseInterceptors, Body, Param } from '@nestjs/common';
 import { CommonService } from './common.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { InitVideoUploadDto } from './dto/init-video-upload.dto';
 import { UploadVideoChunkDto } from './dto/upload-video-chunk.dto';
 import { CompleteVideoUploadDto } from './dto/complete-video-upload.dto';
 
 @ApiTags('Backend / Common')
+@ApiBearerAuth('access_token') 
 @Controller()
 export class CommonController {
     constructor(private readonly commonService: CommonService) { }
@@ -53,6 +54,39 @@ export class CommonController {
         return {
             path: filePath
         };
+    }
+
+
+    @Post('upload-video')
+    @UseInterceptors(FileInterceptor('file'))
+    @ApiOperation({ summary: 'Upload a small mp4 video (<10MB)' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+      schema: {
+        type: 'object',
+        properties: {
+          file: {
+            type: 'string',
+            format: 'binary',
+            description: 'MP4 video file (<10MB)'
+          }
+        }
+      }
+    })
+    @ApiResponse({
+      status: 200,
+      description: 'Video uploaded successfully',
+      schema: {
+        type: 'object',
+        properties: {
+          path: { type: 'string', description: 'Path to the uploaded video' }
+        }
+      }
+    })
+    @ApiResponse({ status: 400, description: 'Bad Request' })
+    async uploadVideo(@UploadedFile() file: Express.Multer.File) {
+      if (!file) throw new BadRequestException('No file uploaded');
+      return this.commonService.uploadSmallVideo(file);
     }
 
     @Post('init-video-upload')
@@ -134,35 +168,4 @@ export class CommonController {
         return this.commonService.completeVideoUpload(dto.uploadId);
     }
 
-    @Post('upload-video')
-    @UseInterceptors(FileInterceptor('file'))
-    @ApiOperation({ summary: 'Upload a small mp4 video (<10MB)' })
-    @ApiConsumes('multipart/form-data')
-    @ApiBody({
-      schema: {
-        type: 'object',
-        properties: {
-          file: {
-            type: 'string',
-            format: 'binary',
-            description: 'MP4 video file (<10MB)'
-          }
-        }
-      }
-    })
-    @ApiResponse({
-      status: 200,
-      description: 'Video uploaded successfully',
-      schema: {
-        type: 'object',
-        properties: {
-          path: { type: 'string', description: 'Path to the uploaded video' }
-        }
-      }
-    })
-    @ApiResponse({ status: 400, description: 'Bad Request' })
-    async uploadVideo(@UploadedFile() file: Express.Multer.File) {
-      if (!file) throw new BadRequestException('No file uploaded');
-      return this.commonService.uploadSmallVideo(file);
-    }
 }
