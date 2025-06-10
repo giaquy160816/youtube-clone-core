@@ -95,6 +95,11 @@ export class VideoController {
                     type: 'boolean',
                     example: true,
                     description: 'Trạng thái video (true: hiển thị, false: ẩn)'
+                },
+                tags: {
+                    type: 'array',
+                    example: ['tag1', 'tag2'],
+                    description: 'Tags của video'
                 }
             }
         }
@@ -121,6 +126,7 @@ export class VideoController {
                         user_id: { type: 'number', example: 1 },
                         user_fullname: { type: 'string', example: 'John Doe' },
                         user_avatar: { type: 'string', example: '/uploads/avatars/example.jpg' },
+                        tags: { type: 'array', example: ['tag1', 'tag2'] },
                         createdAt: { type: 'string', example: '2024-03-20T10:00:00Z' }
                     }
                 }

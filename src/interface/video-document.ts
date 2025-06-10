@@ -9,5 +9,6 @@ interface VideoDocument {
     user_id?: number;
     user_fullname?: string;
     user_avatar?: string;
+    tags?: string[];
     createdAt: string; // ✅ Nên luôn có và dạng ISO
 }

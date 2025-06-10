@@ -31,6 +31,9 @@ export class Video {
     @Column({ type: 'boolean', default: true })
     isActive: boolean;
 
+    @Column({ type: 'simple-array', nullable: true })
+    tags: string[];
+
     @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 

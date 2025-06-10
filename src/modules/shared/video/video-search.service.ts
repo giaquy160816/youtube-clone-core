@@ -34,6 +34,14 @@ export class SearchVideoService implements OnApplicationBootstrap {
                         isActive: { type: 'boolean' },
                         createdAt: { type: 'date', format: 'strict_date_optional_time||epoch_millis' },
                         updatedAt: { type: 'date', format: 'strict_date_optional_time||epoch_millis' },
+                        tags: {
+                            type: 'text',
+                            fields: {
+                                keyword: {
+                                    type: 'keyword'
+                                }
+                            }
+                        },
                         user: {
                             properties: {
                                 id: { type: 'integer' },
@@ -94,6 +102,14 @@ export class SearchVideoService implements OnApplicationBootstrap {
                         {
                             match: {
                                 description: {
+                                    query: q,
+                                    fuzziness: 'auto',
+                                },
+                            },
+                        },
+                        {
+                            match: {
+                                tags: {
                                     query: q,
                                     fuzziness: 'auto',
                                 },

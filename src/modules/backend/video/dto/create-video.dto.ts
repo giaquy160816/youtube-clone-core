@@ -3,6 +3,7 @@ import {
     IsNotEmpty,
     IsOptional,
     IsBoolean,
+    IsArray,
 } from 'class-validator';
 
 export class CreateVideoDto {
@@ -25,4 +26,8 @@ export class CreateVideoDto {
     @IsOptional()
     @IsBoolean()
     isActive?: boolean;
+
+    @IsOptional()
+    @IsArray()
+    tags?: string[];
 }

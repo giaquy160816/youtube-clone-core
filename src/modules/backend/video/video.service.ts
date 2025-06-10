@@ -30,6 +30,7 @@ export class VideoService {
             user_id: video.user?.id,
             user_fullname: video.user?.fullname,
             user_avatar: video.user?.avatar,
+            tags: video.tags,
             createdAt: video.createdAt.toISOString(),
         };
 
@@ -70,6 +71,7 @@ export class VideoService {
     async update(id: number, updateVideoDto: UpdateVideoDto) {
         const video = await this.videoRepository.findOne({
             where: { id },
+            relations: ['user'],
         });
 
         if (!video) {
@@ -81,6 +83,8 @@ export class VideoService {
         video.image = updateVideoDto.image ?? video.image;
         video.isActive = updateVideoDto.isActive ?? video.isActive;
         video.path = updateVideoDto.path ?? video.path;
+        video.tags = updateVideoDto.tags ?? video.tags;
+        video.user = video.user;
 
         const result = await this.videoRepository.save(video);
 
