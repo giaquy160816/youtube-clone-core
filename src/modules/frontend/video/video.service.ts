@@ -32,7 +32,6 @@ export class VideoService {
     
     async findOne(id: number): Promise<VideoResponse> {
         const video = await this.videoCoreService.findByIdOrFail(Number(id));
-
         const videoDetail = {
             id: video.id,
             title: video.title,
@@ -40,6 +39,7 @@ export class VideoService {
             image: video.image || '',
             path: video.path || '',
             views: video.views,
+            tags: video.tags,
             author: video.user.fullname || 'No Name',
             avatar: video.user.avatar,
             createdAt: formatDistance(video.createdAt, new Date(), { addSuffix: true, locale: vi }),

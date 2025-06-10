@@ -34,6 +34,7 @@ export class VideoCoreService {
                 'video.isActive',
                 'video.createdAt',
                 'video.updatedAt',
+                'video.tags',
                 'user.id',
                 'user.fullname',
                 'user.avatar',
@@ -43,8 +44,7 @@ export class VideoCoreService {
 
         if (!video){
             throw new HttpException('Video not found', HttpStatus.NOT_FOUND);
-        } 
-
+        }
         const redisKey = `video:${id}:views`;
 
         // Tăng view Redis (Atomic)
