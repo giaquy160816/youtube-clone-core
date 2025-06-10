@@ -8,6 +8,7 @@ import { CommonModule } from 'src/modules/backend/common/common.module';
 import { PermissionModule } from 'src/modules/backend/permission/permission.module';
 import { GroupPermissionModule } from 'src/modules/backend/group-permission/group-permission.module';
 import { AppScheduleModule } from 'src/schedule/schedule.module';
+import { LikeModule } from 'src/modules/backend/like/like.module';
 
 export const backendRoutes: Routes = [
     { path: 'backend/user', module: UserModule },
@@ -18,6 +19,7 @@ export const backendRoutes: Routes = [
     { path: 'backend/common', module: CommonModule },
     { path: 'backend/permission', module: PermissionModule },
     { path: 'backend/group-permission', module: GroupPermissionModule },
+    { path: 'backend/like', module: LikeModule },
 ];
 
 export const backendModules = [
@@ -30,4 +32,5 @@ export const backendModules = [
     TokenModule,
     SettingModule,
     AppScheduleModule,
+    LikeModule,
 ];
