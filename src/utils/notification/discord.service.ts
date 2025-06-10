@@ -67,6 +67,6 @@ export async function sendDiscordNotification(options: DiscordNotifyOptions): Pr
         });
         console.log(`[✅] Discord notification sent (${level})`);
     } catch (error) {
-        console.error('[❌] Failed to send Discord notification:', error);
+        // console.error('[❌] Failed to send Discord notification:', error);
     }
 }

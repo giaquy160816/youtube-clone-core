@@ -39,7 +39,7 @@ export class VideoService {
             description: video.description || '',
             image: video.image || '',
             path: video.path || '',
-            views: video.view,
+            views: video.views,
             author: video.user.fullname || 'No Name',
             avatar: video.user.avatar,
             createdAt: formatDistance(video.createdAt, new Date(), { addSuffix: true, locale: vi }),

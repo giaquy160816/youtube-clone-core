@@ -52,9 +52,7 @@ export class SearchVideoService implements OnApplicationBootstrap {
             console.log('✅ Index "videos" đã được khởi tạo và mapping.');
         }
     }
-
-
-
+    
     async indexVideo(index: string, document: any) {
         return await this.searchService.index({
             index: 'videos',

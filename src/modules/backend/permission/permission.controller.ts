@@ -2,10 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } f
 import { PermissionService } from './permission.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiHeader, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiHeader, ApiQuery, ApiExcludeController } from '@nestjs/swagger';
 
 @ApiTags('Backend / Permission')
 @ApiBearerAuth('access_token') 
+@ApiExcludeController()
 @Controller()
 export class PermissionController {
     constructor(private readonly permissionService: PermissionService) {}

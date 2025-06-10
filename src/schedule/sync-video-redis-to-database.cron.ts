@@ -8,8 +8,8 @@ export class SyncVideoRedisToDatabaseCron {
         private readonly videoCoreService: VideoCoreService
     ) { }
 
-    // Chạy mỗi 1 phút
-    @Cron('*/1 * * * *')    
+    // @Cron('*/1 * * * *')    // 1phút chạy 1 lần
+    @Cron('*/30 * * * * *')  // 30 giây chạy 1 lần
     async handleSync() {
         console.log('PID:', process.pid, new Date().toISOString(), 'Syncing data video redis to database...');
         await this.videoCoreService.syncViewsToDatabase();

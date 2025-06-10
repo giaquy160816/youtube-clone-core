@@ -1,16 +1,20 @@
-import { BadRequestException, Controller, Post, UploadedFile, UseInterceptors, Body, Param } from '@nestjs/common';
+import { BadRequestException, Controller, Post, UploadedFile, UseInterceptors, Body, Param, Delete, UseGuards } from '@nestjs/common';
 import { CommonService } from './common.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { InitVideoUploadDto } from './dto/init-video-upload.dto';
 import { UploadVideoChunkDto } from './dto/upload-video-chunk.dto';
 import { CompleteVideoUploadDto } from './dto/complete-video-upload.dto';
+import { RedisService } from 'src/service/redis/redis.service';
 
 @ApiTags('Backend / Common')
-@ApiBearerAuth('access_token') 
+@ApiBearerAuth('access_token')
 @Controller()
 export class CommonController {
-    constructor(private readonly commonService: CommonService) { }
+    constructor(
+        private readonly commonService: CommonService,
+        private readonly redisService: RedisService
+    ) {}
 
     @Post('upload-image')
     @UseInterceptors(FileInterceptor('file'))
@@ -168,4 +172,39 @@ export class CommonController {
         return this.commonService.completeVideoUpload(dto.uploadId);
     }
 
+    @Delete('clear-redis')
+    @ApiOperation({ 
+        summary: 'Clear all Redis cache', 
+        description: 'Delete all keys from Redis cache' 
+    })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'All Redis cache cleared successfully.',
+        schema: {
+            type: 'object',
+            properties: {
+                message: {
+                    type: 'string',
+                    example: 'All Redis cache cleared successfully'
+                },
+                deletedKeys: {
+                    type: 'number',
+                    example: 100
+                }
+            }
+        }
+    })
+    async clearAllCache() {
+        const keys = await this.redisService.keys('*');
+        if (keys.length > 0) {
+            for (const key of keys) {
+                await this.redisService.del(key);
+            }
+        }
+        
+        return {
+            message: 'All Redis cache cleared successfully',
+            deletedKeys: keys.length
+        };
+    }
 }

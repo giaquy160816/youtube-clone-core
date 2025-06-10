@@ -54,7 +54,6 @@ export class VideoCoreService {
         const redisViews = parseInt(await this.redisService.get(redisKey) || '0', 10);
         const view = video.view || 0;
         const totalViews = (view || 0) + redisViews;
-
         return {
             ...video,
             views: totalViews,

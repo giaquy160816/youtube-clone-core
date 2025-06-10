@@ -11,7 +11,6 @@ export class RedisService {
     
     async getJson<T = any>(key: string): Promise<T | null> {
         const data = await this.client.get(key);
-        console.log('data từ redis', data);
         if (!data) return null;
         try {
             return JSON.parse(data);

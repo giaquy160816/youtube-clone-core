@@ -2,9 +2,11 @@ import { Controller, Get, Post, Body, Put, Param } from '@nestjs/common';
 import { SettingService } from './setting.service';
 import { CreateSettingDto } from './dto/create-setting.dto';
 import { UpdateSettingDto } from './dto/update-setting.dto';
-import { ApiTags, ApiParam, ApiBody, ApiOperation, ApiResponse, ApiConsumes, ApiProduces } from '@nestjs/swagger';
+import { ApiTags, ApiParam, ApiBody, ApiOperation, ApiResponse, ApiConsumes, ApiProduces, ApiExcludeController, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('Backend / Cài đặt')
+@ApiBearerAuth('access_token')
+@ApiExcludeController()
 @Controller()
 export class SettingController {
     constructor(private readonly settingService: SettingService) { }

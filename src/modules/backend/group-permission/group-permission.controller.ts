@@ -2,15 +2,16 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } f
 import { GroupPermissionService } from './group-permission.service';
 import { CreateGroupPermissionDto } from './dto/create-group-permission.dto';
 import { UpdateGroupPermissionDto } from './dto/update-group-permission.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiExcludeController } from '@nestjs/swagger';
 
 @ApiTags('Backend / GroupPermission')
-@ApiBearerAuth('access_token') 
+@ApiBearerAuth('access_token')
+@ApiExcludeController()
 @Controller()
 export class GroupPermissionController {
     constructor(
         private readonly groupPermissionService: GroupPermissionService,
-    ) {}
+    ) { }
 
     @Post()
     @ApiOperation({ summary: 'Tạo nhóm quyền mới' })
