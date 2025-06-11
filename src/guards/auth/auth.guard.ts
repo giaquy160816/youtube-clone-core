@@ -5,7 +5,7 @@ import { IS_PUBLIC_KEY } from 'src/common/constants/meta-keys';
 import { extractTokenFromHeader } from 'src/utils/token/extractToken.utils';
 import configuration from 'src/config/configuration';
 import { decryptPayload } from 'src/utils/token/jwt-encrypt.utils';
-import { sendDiscordNotification } from 'src/utils/notification/discord.service';
+import { sendSlackNotification } from 'src/utils/notification/slack.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -27,7 +27,7 @@ export class AuthGuard implements CanActivate {
         
         if (!token){
             // send discord notification
-            await sendDiscordNotification({
+            await sendSlackNotification({
                 level: 'error',
                 title: '🚨 Auth Guard Error',
                 fields: {
@@ -52,7 +52,7 @@ export class AuthGuard implements CanActivate {
             return true;
         } catch (error) {
             // send discord notification
-            await sendDiscordNotification({
+            await sendSlackNotification({
                 level: 'error',
                 title: '🚨 Auth Guard Error',
                 fields: {
@@ -74,4 +74,8 @@ export class AuthGuard implements CanActivate {
             return false;
         }
     }
+}
+
+function SlackNotifyOptions(arg0: { level: string; title: string; fields: { Error: string; Time: string; }; }) {
+    throw new Error('Function not implemented.');
 }

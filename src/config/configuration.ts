@@ -42,6 +42,7 @@ export default () => {
         notify: {
             errorEmail: process.env.ERROR_NOTIFY_EMAIL,
             discordWebhook: process.env.DISCORD_WEBHOOK_URL,
+            slackWebhook: process.env.SLACK_WEBHOOK_URL,
         },
         cors: (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:4000').split(','),
         port: parseInt(process.env.PORT || '3001', 10),

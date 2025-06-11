@@ -8,7 +8,7 @@ import {
     ThrottlerGuard,
     ThrottlerLimitDetail,
 } from '@nestjs/throttler';
-import { sendDiscordNotification } from 'src/utils/notification/discord.service';
+import { sendSlackNotification } from 'src/utils/notification/slack.service';
 
 @Injectable()
 export class CustomThrottlerGuard extends ThrottlerGuard {
@@ -21,7 +21,7 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
         _limitDetail: ThrottlerLimitDetail, // bạn có thể dùng để hiện TTL còn lại nếu muốn
     ): Promise<void> {
         // send discord notification
-        await sendDiscordNotification({
+        await sendSlackNotification({
             level: 'error',
             title: '🚫 Rate limit exceeded',
             fields: {
