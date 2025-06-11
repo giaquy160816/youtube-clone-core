@@ -49,6 +49,7 @@ export class VideoService {
         video.image = createVideoDto.image;
         video.isActive = createVideoDto.isActive ?? true;
         video.path = createVideoDto.path;
+        video.tags = createVideoDto.tags ?? [];
 
         // Kiểm tra userId có tồn tại không
         const user = await this.videoRepository.manager.getRepository(User).findOne({
@@ -102,11 +103,14 @@ export class VideoService {
         return { data, total, page, limit };
     }
 
-    async delete(id: number): Promise<any> {
-        const result = await this.videoRepository.delete(id);
-        if (result.affected === 0) {
+    async delete(id: number, userId: number): Promise<any> {
+        const video = await this.videoRepository.findOne({
+            where: { id, user: { id: userId } },
+        });
+        if (!video) {
             throw new HttpException('Video not found', HttpStatus.NOT_FOUND);
         }
+        await this.videoRepository.remove(video);
         await this.SearchVideoService.deleteVideoFromIndex(id); // xoá trong ES
         return {
             message: 'Video deleted successfully.'
@@ -145,6 +149,9 @@ export class VideoService {
     async findAllByUserId(userId: number, page = 1, limit = 2): Promise<{ data: Video[]; total: number; page: number; limit: number }> {
         const [data, total] = await this.videoRepository.findAndCount({
             where: { user: { id: userId } },
+            order: {
+                createdAt: 'DESC',
+            },
             skip: (page - 1) * limit,
             take: limit,
         });

@@ -273,7 +273,11 @@ export class VideoController {
             }
         }
     })
-    delete(@Param('id') id: number) {
-        return this.videoService.delete(id);
+    delete(@Param('id') id: number, @Request() req) {
+        const userId = Number(req.user?.sub);
+        if (!userId || isNaN(userId)) {
+            throw new BadRequestException('Invalid user id in token');
+        }
+        return this.videoService.delete(id, userId);
     }
 }

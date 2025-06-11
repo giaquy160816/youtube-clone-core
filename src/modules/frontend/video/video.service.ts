@@ -20,6 +20,7 @@ export class VideoService {
             author: video.user_fullname || 'Unknown',
             views: video.view,
             avatar: video.user_avatar,
+            tags: video.tags,
             createdAt: formatDistance(video.createdAt, new Date(), { addSuffix: true, locale: vi })
         }));
         return {

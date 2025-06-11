@@ -144,12 +144,15 @@ export class SearchVideoService implements OnApplicationBootstrap {
             ],
         });
 
+
         const total =
             typeof result.hits.total === 'number'
                 ? result.hits.total
                 : result.hits.total?.value || 0;
 
         const data = result.hits.hits.map((hit) => hit._source);
+
+        console.log(data);
         return { data, total, page, limit };
     }
 
