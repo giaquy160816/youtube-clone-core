@@ -127,6 +127,7 @@ export class VideoService {
                 'video.isActive',
                 'video.createdAt',
                 'video.updatedAt',
+                'video.tags',
                 'user.id',
                 'user.fullname',
                 'user.avatar'

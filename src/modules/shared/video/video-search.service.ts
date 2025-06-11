@@ -85,7 +85,6 @@ export class SearchVideoService implements OnApplicationBootstrap {
     async searchAdvanced(q?: string, page = 1, limit = 2) {
         const from = (page - 1) * limit;
         const isNumber = q && /^\d+$/.test(q);
-
         // Nếu không có query thì match_all
         const query: any = q
             ? {
@@ -151,7 +150,6 @@ export class SearchVideoService implements OnApplicationBootstrap {
                 : result.hits.total?.value || 0;
 
         const data = result.hits.hits.map((hit) => hit._source);
-
         return { data, total, page, limit };
     }
 
