@@ -101,6 +101,7 @@ export class VideoCoreService {
             isActive: video.isActive,
             path: video.path,
             view: video.view,
+            tags: video.tags,
             user_id: video.user?.id,
             user_fullname: video.user?.fullname,
             user_avatar: video.user?.avatar,

@@ -3,6 +3,8 @@ services:
     image: postgres:14
     container_name: postgres-app
     restart: unless-stopped
+    networks:
+      - app-network
     environment:
       POSTGRES_USER: app_postgres_user
       POSTGRES_PASSWORD: app_postgres_password
@@ -11,7 +13,6 @@ services:
       - "5432:5432"
     volumes:
       - /Volumes/Data/docker/postgres:/var/lib/postgresql/data  # only this is mounted
-    # Nếu dùng VPS:
     # - /var/vps-data/postgres:/var/lib/postgresql/data
 
   redis:
@@ -22,10 +23,14 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data  # internal volume
+    networks:
+      - app-network
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
     container_name: elasticsearch
+    networks:
+      - app-network
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -52,6 +57,8 @@ services:
     depends_on:
       - elasticsearch
     restart: unless-stopped
+    networks:
+      - app-network
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -65,12 +72,16 @@ services:
       RABBITMQ_DEFAULT_PASS: rabbitpassword
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq  # internal volume
+    networks:
+      - app-network
 
   dev:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: nestjs-dev
+    networks:
+      - app-network
     ports:
       - "3002:3002"
     volumes:
@@ -91,3 +102,7 @@ volumes:
   redis-data:
   es-data:
   rabbitmq-data:
+
+networks:
+  app-network:
+    external: true

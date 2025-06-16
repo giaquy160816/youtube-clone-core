@@ -10,7 +10,6 @@ import { SearchVideoService } from '../../shared/video/video-search.service';
 import { VideoController } from './video.controller';
 import { VideoMicroservice } from './video.microservice';
 import { VideoService } from './video.service';
-import { VideoUploadService } from './video-upload.service';
 @Module({
     imports: [
         TypeOrmModule.forFeature([Video]),
@@ -24,7 +23,7 @@ import { VideoUploadService } from './video-upload.service';
         ]),
     ],
     controllers: [VideoController, VideoMicroservice],
-    providers: [VideoService, SearchVideoService, VideoUploadService],
+    providers: [VideoService, SearchVideoService],
     exports: [VideoService],
 })
 export class VideoModule {}

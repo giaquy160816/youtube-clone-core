@@ -13,7 +13,6 @@ import {
 import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { VideoService } from './video.service';
-import { VideoUploadService } from './video-upload.service';
 import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
 
 
@@ -23,7 +22,6 @@ import { ApiTags, ApiResponse, ApiOperation, ApiBody, ApiBearerAuth, ApiExcludeE
 export class VideoController {
     constructor(
         private readonly videoService: VideoService,
-        private readonly videoUploadService: VideoUploadService,
     ) { }
     
     @Post('reindex')

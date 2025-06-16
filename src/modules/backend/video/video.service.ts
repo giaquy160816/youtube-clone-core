@@ -137,7 +137,7 @@ export class VideoService {
                 'user.avatar'
             ])
             .getMany();
-
+        console.log(videos);
         const formattedVideos = await Promise.all(videos.map(video => this.formatAndIndexVideo(video)));
         console.log(`🗃️ DB có ${videos.length} video`);
         return {
