@@ -7,7 +7,7 @@ export class SearchVideoService implements OnApplicationBootstrap {
 
     constructor(
         private readonly searchService: ElasticsearchService
-    ) {}
+    ) { }
 
 
     // Khi app khởi động se import tất cả video từ DB vào ES
@@ -60,12 +60,20 @@ export class SearchVideoService implements OnApplicationBootstrap {
             console.log('✅ Index "videos" đã được khởi tạo và mapping.');
         }
     }
-    
+
     async indexVideo(index: string, document: any) {
         return await this.searchService.index({
-            index: 'videos',
+            index: this.indexEs,
             id: document.id.toString(), // ✅ dùng id làm khóa
             document: document,
+        });
+    }
+
+    async updateVideo(id: string, partialDoc: Partial<any>) {
+        return await this.searchService.update({
+            index: this.indexEs,
+            id: id,
+            doc: partialDoc,
         });
     }
 
@@ -118,7 +126,11 @@ export class SearchVideoService implements OnApplicationBootstrap {
                 },
             }
             : {
-                match_all: {},
+                bool: {
+                    filter: {
+                        term: { isActive: true },
+                    },
+                },
             };
 
         // Nếu là số và có query → thêm điều kiện match theo ID

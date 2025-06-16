@@ -80,6 +80,7 @@ export async function sendSlackNotification(options: SlackNotifyOptions): Promis
     ];
 
     try {
+        console.log('blocks', blocks);
         await axios.post(webhookUrl, {
             username: '🔔 NestJS SlackBot',
             icon_url: 'https://cdn-icons-png.flaticon.com/512/5968/5968705.png',

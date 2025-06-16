@@ -7,6 +7,7 @@ import { SearchVideoService } from 'src/modules/shared/video/video-search.servic
 import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { User } from 'src/modules/backend/user/entities/user.entity';
+import { join } from 'path';
 
 @Injectable()
 export class VideoService {
@@ -33,6 +34,14 @@ export class VideoService {
             tags: video.tags,
             createdAt: video.createdAt.toISOString(),
         };
+
+        if (video.path && video.path.includes('uploads/videos') && !video.path.includes('.m3u8')) {
+            const finalDir = join(process.cwd(), video.path);
+            this.client.emit('convert_video', {
+                videoId: video.id,
+                videoPath: finalDir
+            }).subscribe();
+        }
 
         this.client.emit('index_video', {
             index: 'videos',
