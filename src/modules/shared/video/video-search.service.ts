@@ -163,8 +163,6 @@ export class SearchVideoService implements OnApplicationBootstrap {
                 : result.hits.total?.value || 0;
 
         const data = result.hits.hits.map((hit) => hit._source);
-
-        console.log(data);
         return { data, total, page, limit };
     }
 

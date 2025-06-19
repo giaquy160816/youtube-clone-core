@@ -3,10 +3,12 @@ import {
     CreateDateColumn,
     Entity,
     ManyToOne,
+    OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
 import { User } from 'src/modules/backend/user/entities/user.entity';
+import { Watched } from '../../watched/entities/watched.entity';
 
 @Entity('video')
 export class Video {
@@ -44,4 +46,7 @@ export class Video {
         onDelete: 'CASCADE',
     })
     user: User;
+
+    @OneToOne(() => Watched, (watched) => watched.video)
+    watched: Watched;
 }

@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('likes')
+@Entity('liked')
 export class Like {
     @PrimaryGeneratedColumn()
     id: number;

@@ -9,6 +9,7 @@ import { PermissionModule } from 'src/modules/backend/permission/permission.modu
 import { GroupPermissionModule } from 'src/modules/backend/group-permission/group-permission.module';
 import { AppScheduleModule } from 'src/schedule/schedule.module';
 import { LikeModule } from 'src/modules/backend/like/like.module';
+import { WatchedModule } from 'src/modules/backend/watched/watched.module';
 
 export const backendRoutes: Routes = [
     { path: 'backend/user', module: UserModule },
@@ -20,6 +21,7 @@ export const backendRoutes: Routes = [
     { path: 'backend/permission', module: PermissionModule },
     { path: 'backend/group-permission', module: GroupPermissionModule },
     { path: 'backend/like', module: LikeModule },
+    { path: 'backend/watched', module: WatchedModule },
 ];
 
 export const backendModules = [
@@ -33,4 +35,5 @@ export const backendModules = [
     SettingModule,
     AppScheduleModule,
     LikeModule,
+    WatchedModule,
 ];
