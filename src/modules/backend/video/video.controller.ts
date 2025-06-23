@@ -132,7 +132,6 @@ export class VideoController {
         }
     })
     create(@Request() req, @Body() createVideoDto: CreateVideoDto) {
-        console.log('req.user', req.user);
         const userId = Number(req.user?.sub);
         if (!userId || isNaN(userId)) {
             throw new BadRequestException('Invalid user id in token');

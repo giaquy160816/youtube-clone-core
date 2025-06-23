@@ -16,6 +16,7 @@ export class VideoService {
             id: video.id,
             title: video.title,
             image: video.image,
+            path: video.path,
             thumbnail: video.image,
             author: video.user_fullname || 'Unknown',
             views: video.view,

@@ -22,7 +22,6 @@ export class LikeService {
         }
         await this.redisService.setJson(redisKey, likeDb, 60 * 60 * 24);
         const likeRedis = await this.redisService.get(redisKey);
-        console.log('redisKey', likeRedis);
         return {
             message: 'Like created successfully'
         };
@@ -37,7 +36,6 @@ export class LikeService {
         }
         await this.redisService.setJson(redisKey, likeDb, 60 * 60 * 24);
         const like = await this.redisService.get(redisKey);
-        console.log('redisKey', like);
         return {
             message: 'Like removed successfully'
         };
@@ -84,7 +82,6 @@ export class LikeService {
                         }
                     });
                     if(!likeDb) {
-                        console.log('likeDb', likeDb);
                         await this.likeRepository.save({
                             user_id: Number(likeRedis.user_id),
                             video_id: Number(likeRedis.video_id),

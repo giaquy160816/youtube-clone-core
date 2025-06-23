@@ -6,9 +6,11 @@ import {
     OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
+    OneToMany,
 } from 'typeorm';
 import { User } from 'src/modules/backend/user/entities/user.entity';
 import { Watched } from '../../watched/entities/watched.entity';
+import { PlaylistVideo } from '../../playlists/entities/playlist-video.entity';
 
 @Entity('video')
 export class Video {
@@ -49,4 +51,7 @@ export class Video {
 
     @OneToOne(() => Watched, (watched) => watched.video)
     watched: Watched;
+
+    @OneToMany(() => PlaylistVideo, (playlistVideo) => playlistVideo.video)
+    playlistVideos: PlaylistVideo[];
 }

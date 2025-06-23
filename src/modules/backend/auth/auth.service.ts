@@ -93,7 +93,6 @@ export class AuthService {
     }
 
     async refreshToken(refreshToken: string, req: Request) {
-        console.log('refreshToken', refreshToken);
         let decodeToken: any;
         try {
             decodeToken = this.jwtService.verify(refreshToken, {

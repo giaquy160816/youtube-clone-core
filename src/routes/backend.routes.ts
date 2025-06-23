@@ -10,6 +10,9 @@ import { GroupPermissionModule } from 'src/modules/backend/group-permission/grou
 import { AppScheduleModule } from 'src/schedule/schedule.module';
 import { LikeModule } from 'src/modules/backend/like/like.module';
 import { WatchedModule } from 'src/modules/backend/watched/watched.module';
+import { PlaylistVideoModule } from 'src/modules/backend/playlists/playlist-video.module';
+import { PlaylistsModule } from 'src/modules/backend/playlists/playlists.module';
+
 
 export const backendRoutes: Routes = [
     { path: 'backend/user', module: UserModule },
@@ -22,6 +25,8 @@ export const backendRoutes: Routes = [
     { path: 'backend/group-permission', module: GroupPermissionModule },
     { path: 'backend/like', module: LikeModule },
     { path: 'backend/watched', module: WatchedModule },
+    { path: 'backend/playlists', module: PlaylistsModule },
+    { path: 'backend/playlist-video', module: PlaylistVideoModule },
 ];
 
 export const backendModules = [
@@ -36,4 +41,6 @@ export const backendModules = [
     AppScheduleModule,
     LikeModule,
     WatchedModule,
+    PlaylistsModule,
+    PlaylistVideoModule,
 ];

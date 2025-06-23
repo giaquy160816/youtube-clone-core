@@ -28,7 +28,6 @@ export class VideoController {
     @ApiOperation({ summary: 'Xem chi tiết video', description: 'API lấy thông tin chi tiết của một video theo ID' })
     @ApiParam({ name: 'id', type: Number, description: 'ID của video' })
     async findOne(@Param('id') id: number): Promise<VideoResponse> {
-        console.log('📥 Đã vào view detail:', id);
         const video = await this.videoService.findOne(id);
         return video;
     }

@@ -80,7 +80,6 @@ export class VideoCoreService {
                 await this.videoRepository.increment({ id: videoId }, 'view', count);
                 await this.redisService.del(key);
                 await this.sysVideoToES(videoId);
-                console.log(`Synced ${count} views for video ${videoId}`);
             }
         }
     }

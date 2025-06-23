@@ -12,7 +12,6 @@ export class SearchVideoService implements OnApplicationBootstrap {
 
     // Khi app khởi động se import tất cả video từ DB vào ES
     async onApplicationBootstrap() {
-        console.log('elasticsearch service is ready');
         const exists = await this.searchService.indices.exists({ index: this.indexEs });
         if (!exists) {
             await this.searchService.indices.create({ index: this.indexEs });
@@ -57,7 +56,6 @@ export class SearchVideoService implements OnApplicationBootstrap {
                     }
                 }
             });
-            console.log('✅ Index "videos" đã được khởi tạo và mapping.');
         }
     }
 

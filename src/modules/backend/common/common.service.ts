@@ -100,8 +100,6 @@ export class CommonService {
         filename: string,
         totalSize: number,
     ): Promise<{ uploadId: string }> {
-        console.log('filename', filename);
-        console.log('totalSize', totalSize);
         const uploadId = uuidv4();
         const now = new Date();
         const year = now.getFullYear().toString();
@@ -135,10 +133,6 @@ export class CommonService {
         if (!session) {
             throw new NotFoundException('Upload session not found');
         }
-        console.log('Uploaded chunks:', Array.from(session.uploadedChunks));
-        console.log('Expected chunks:', session.chunks);
-        console.log('chunkIndex', chunkIndex);
-        console.log('chunk', chunk);
         if (chunkIndex >= session.chunks) {
             throw new BadRequestException('Invalid chunk index');
         }
@@ -194,13 +188,6 @@ export class CommonService {
         return {
             path: relativePath,
         };
-        const {
-            playlistPath
-        } = await convertVideo(finalPath);
-        console.log('finalPath', finalPath);
-        return {
-            path: playlistPath,
-        };
     }
 
     async uploadSmallVideo(file: Express.Multer.File): Promise<{ path: string }> {
@@ -240,13 +227,8 @@ export class CommonService {
         const uploadPath = join(dirPath, filename);
         const relativePath = join('uploads', 'videos', year, month, day, `${timestamp}`, filename);
         await writeFile(uploadPath, file.buffer);
-        console.log('uploadPath', uploadPath);
         return {
             path: relativePath,
         };
-        const {
-            playlistPath
-        } = await convertVideo(uploadPath);
-        return { path: playlistPath };
     }
 }

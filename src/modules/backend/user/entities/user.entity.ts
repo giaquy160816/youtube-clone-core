@@ -4,6 +4,7 @@ import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDate
 import { Auth } from 'src/modules/backend/auth/entities/auth.entity';
 import { Video } from "src/modules/backend/video/entities/video.entity";
 import { GroupPermission } from "src/modules/backend/group-permission/entities/group-permission.entity";
+import { Playlists } from "src/modules/backend/playlists/entities/playlist.entity";
 
 @Entity()
 export class User {
@@ -48,4 +49,7 @@ export class User {
 
     @OneToMany(() => Video, (video) => video.user)
     videos: Video[];
+
+    @OneToMany(() => Playlists, (playlist) => playlist.user)
+    playlists: Playlists[];
 }
