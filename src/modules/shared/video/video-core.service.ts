@@ -31,6 +31,7 @@ export class VideoCoreService {
                 'video.image',
                 'video.path',
                 'video.view',
+                'video.like',
                 'video.isActive',
                 'video.createdAt',
                 'video.updatedAt',

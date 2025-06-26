@@ -6,6 +6,7 @@ interface VideoDocument {
     isActive: boolean;
     path?: string;
     view?: number;
+    like?: number;
     user_id?: number;
     user_fullname?: string;
     user_avatar?: string;

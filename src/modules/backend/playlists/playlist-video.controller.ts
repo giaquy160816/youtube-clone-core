@@ -18,10 +18,10 @@ export class PlaylistVideoController {
     }
 
 
-    @Delete(':id')
-    remove(@Param('id') id: string, @Request() req) {
+    @Delete(':id/:videoId')
+    remove(@Param('id') id: string, @Param('videoId') videoId: string, @Request() req) {
         const userId = Number(req.user?.sub);
         if (!userId || isNaN(userId)) throw new Error('Invalid user id in token');
-        return this.playlistVideoService.remove(Number(id), userId);
+        return this.playlistVideoService.remove(Number(id), Number(videoId), userId);
     }
 } 

@@ -1,4 +1,3 @@
-import { Video } from "src/modules/backend/video/entities/video.entity";
 
 export interface VideoResponseDetail {
     id: number;
@@ -7,6 +6,8 @@ export interface VideoResponseDetail {
     image: string;
     path: string;
     views: number;
+    like: number;
+    tags: string[];
     author: string;
     avatar: string;
     createdAt: string;

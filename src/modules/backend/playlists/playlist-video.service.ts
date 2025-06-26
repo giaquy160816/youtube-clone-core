@@ -44,13 +44,20 @@ export class PlaylistVideoService {
     }
 
 
-    async remove(id: number, userId: number) {
-        const playlistVideo = await this.playlistVideoRepository.findOne(
-            { where: { id, playlist: { user: { id: userId } } } }
-        );
+    async remove(playlistId: number, videoId: number, userId: number) {
+        const playlistVideo = await this.playlistVideoRepository.findOne({
+            where: {
+                playlist: { 
+                    id: playlistId,
+                    user: { id: userId }
+                },
+                video: { id: videoId }
+            },
+            relations: ['playlist', 'video']
+        });
         if (!playlistVideo) throw new HttpException('Playlist video not found', HttpStatus.NOT_FOUND);
 
-        this.playlistVideoRepository.remove(playlistVideo);
+        await this.playlistVideoRepository.remove(playlistVideo);
         return {
             message: 'Playlist video deleted successfully',
         }

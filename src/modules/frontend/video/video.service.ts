@@ -41,6 +41,7 @@ export class VideoService {
             image: video.image || '',
             path: video.path || '',
             views: video.views,
+            like: video.like || 0,
             tags: video.tags,
             author: video.user.fullname || 'No Name',
             avatar: video.user.avatar,
@@ -48,7 +49,7 @@ export class VideoService {
         };
         return {
             data: videoDetail,
-            message: 'Video found',
+            message: 'Get video detail successfully',
             status: 1,
         };
     }

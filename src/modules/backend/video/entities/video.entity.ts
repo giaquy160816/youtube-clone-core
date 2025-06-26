@@ -32,6 +32,9 @@ export class Video {
     @Column({ type: 'int', default: 0 })
     view: number;
 
+    @Column({ type: 'int', default: 0 })
+    like: number;
+
     @Column({ type: 'boolean', default: true })
     isActive: boolean;
 

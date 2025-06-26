@@ -1,15 +1,18 @@
 import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Like } from './entities/like.entity';
 import { CreateLikeDto } from './dto/create-like.dto';
 import { RedisService } from 'src/service/redis/redis.service';
+import { Video } from '../video/entities/video.entity';
 
 @Injectable()
 export class LikeService {
     constructor(
         @InjectRepository(Like)
         private readonly likeRepository: Repository<Like>,
+        @InjectRepository(Video)
+        private readonly videoRepository: Repository<Video>,
         private readonly redisService: RedisService,
     ) { }
 
@@ -71,30 +74,46 @@ export class LikeService {
 
     async syncLikeRedisToDatabase() {
         const likes = await this.redisService.keys('user:*:likes:video:*');
-        if(likes.length > 0) {
+        const updatedVideoIds = new Set<number>();
+
+        if (likes.length > 0) {
             for (const like of likes) {
                 const likeRedis = await this.redisService.getJson(like);
-                if(likeRedis && likeRedis.is_liked === true) {
-                    const likeDb = await this.likeRepository.findOne({
-                        where: { 
-                            video_id: Number(likeRedis.video_id),
-                            user_id: Number(likeRedis.user_id)
+                if (likeRedis) {
+                    const videoId = Number(likeRedis.video_id);
+                    const userId = Number(likeRedis.user_id);
+
+                    if (likeRedis.is_liked === true) {
+                        const likeDb = await this.likeRepository.findOne({
+                            where: { video_id: videoId, user_id: userId }
+                        });
+                        if (!likeDb) {
+                            await this.likeRepository.save({
+                                user_id: userId,
+                                video_id: videoId,
+                                is_liked: true
+                            });
                         }
-                    });
-                    if(!likeDb) {
-                        await this.likeRepository.save({
-                            user_id: Number(likeRedis.user_id),
-                            video_id: Number(likeRedis.video_id),
-                            is_liked: true
+                    } else {
+                        await this.likeRepository.delete({
+                            video_id: videoId,
+                            user_id: userId
                         });
                     }
-                }else{
-                    const result = await this.likeRepository.delete({
-                        video_id: Number(likeRedis.video_id),
-                        user_id: Number(likeRedis.user_id)
-                    });
+                    updatedVideoIds.add(videoId);
                 }
                 await this.redisService.del(like);
+            }
+
+            // Đếm lại số like và cập nhật vào bảng video
+            for (const videoId of updatedVideoIds) {
+                const likeCount = await this.likeRepository.count({
+                    where: { video_id: videoId }
+                });
+                await this.videoRepository.update(
+                    { id: videoId },
+                    { like: likeCount } // Đổi 'like' thành tên cột thực tế nếu khác
+                );
             }
         }
     }
