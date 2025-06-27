@@ -203,4 +203,37 @@ export class SearchVideoService implements OnApplicationBootstrap {
             message: `Đã xoá tất cả document có id = ${videoId}`,
         };
     }
+
+    async searchVideosByIds(videoIds: number[], from = 0, size = 10) {
+        const result = await this.searchService.search({
+            index: this.indexEs,
+            query: {
+                terms: {
+                    id: videoIds
+                }
+            },
+            from,
+            size,
+            sort: [
+                {
+                    id: {
+                        order: 'desc'
+                    }
+                }
+            ]
+        });
+
+        const total = typeof result.hits.total === 'number' 
+            ? result.hits.total 
+            : result.hits.total?.value || 0;
+
+        const videos = result.hits.hits.map(hit => hit._source);
+        
+        return {
+            data: videos,
+            total,
+            from,
+            size
+        };
+    }
 }

@@ -62,4 +62,22 @@ export class PlaylistVideoService {
             message: 'Playlist video deleted successfully',
         }
     }
+
+    async getPlaylistsByVideoId(videoId: number, userId: number) {
+        const playlists = await this.playlistVideoRepository.find({
+            where: {
+                video: { id: videoId },
+                playlist: { user: { id: 1 } }
+            },
+            relations: ['playlist', 'playlist.user'],
+            select: {
+                playlist: {
+                    id: true
+                }
+            }
+        });
+        return {
+            data: playlists.map(pv => pv.playlist.id)
+        };
+    }
 } 

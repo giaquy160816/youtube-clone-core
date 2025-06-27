@@ -17,6 +17,20 @@ export class PlaylistVideoController {
         return this.playlistVideoService.create(dto, userId);
     }
 
+    @Get('video/:videoId')
+    @ApiOperation({ summary: 'Get playlists where a video has been saved' })
+    @ApiParam({ name: 'videoId', description: 'ID of the video' })
+    @ApiResponse({ status: 200, description: 'List of playlists containing the video' })
+    @ApiResponse({ status: 400, description: 'Invalid video ID' })
+    getPlaylistsByVideoId(@Param('videoId') videoId: string, @Request() req) {
+        const userId = Number(req.user?.sub);
+        if (!userId || isNaN(userId)) throw new Error('Invalid user id in token');
+        
+        const videoIdNum = Number(videoId);
+        if (!videoIdNum || isNaN(videoIdNum)) throw new Error('Invalid video ID');
+        
+        return this.playlistVideoService.getPlaylistsByVideoId(videoIdNum, userId);
+    }
 
     @Delete(':id/:videoId')
     remove(@Param('id') id: string, @Param('videoId') videoId: string, @Request() req) {
@@ -24,4 +38,5 @@ export class PlaylistVideoController {
         if (!userId || isNaN(userId)) throw new Error('Invalid user id in token');
         return this.playlistVideoService.remove(Number(id), Number(videoId), userId);
     }
+    
 } 

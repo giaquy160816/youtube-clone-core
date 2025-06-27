@@ -1,7 +1,9 @@
-import { Controller, Post, Delete, Body, Param, Get, Request, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Delete, Body, Param, Get, Request, BadRequestException, Query } from '@nestjs/common';
 import { LikeService } from './like.service';
 import { CreateLikeDto } from './dto/create-like.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { GetLikedVideosDto } from './dto/get-liked-videos.dto';
+import { LikedVideosResponseDto } from './dto/liked-videos-response.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiBody, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Backend / Likes')
 @ApiBearerAuth('access_token') 
@@ -104,5 +106,41 @@ export class LikeController {
             throw new BadRequestException('Invalid user id in token');
         }
         return this.likeService.checkLike(userId, +videoId);
+    }
+
+    @Get('liked-videos')
+    @ApiOperation({ 
+        summary: 'Get liked videos', 
+        description: 'Get paginated list of videos liked by the current user' 
+    })
+    @ApiQuery({
+        name: 'page',
+        description: 'Page number (starts from 1)',
+        required: false,
+        type: Number,
+        example: 1
+    })
+    @ApiQuery({
+        name: 'limit',
+        description: 'Number of items per page',
+        required: false,
+        type: Number,
+        example: 10
+    })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'Liked videos retrieved successfully.',
+        type: LikedVideosResponseDto
+    })
+    @ApiResponse({ 
+        status: 400, 
+        description: 'Invalid user id in token.' 
+    })
+    getLikedVideos(@Request() req, @Query() query: GetLikedVideosDto) {
+        const userId = Number(req.user?.sub);
+        if (!userId || isNaN(userId)) {
+            throw new BadRequestException('Invalid user id in token');
+        }
+        return this.likeService.getLikedVideos(userId, query);
     }
 }
