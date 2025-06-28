@@ -4,15 +4,12 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { GroupPermission } from 'src/modules/backend/group-permission/entities/group-permission.entity';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
-        @InjectRepository(GroupPermission)
-        private groupPermissionRepository: Repository<GroupPermission>,
     ) { }
 
     async findAll(q?: string, page: number = 1, limit: number = 10): Promise<any> {
@@ -93,17 +90,8 @@ export class UserService {
             throw new HttpException('You are not allowed to update email', HttpStatus.BAD_REQUEST);
         }
 
-        // Xử lý cập nhật groupPermissions nếu có
-        if (updateUserDto.groupPermissionId) {
-            const groupPermission = await this.groupPermissionRepository.findOne({ where: { id: updateUserDto.groupPermissionId } });
-            if (!groupPermission) {
-                throw new HttpException('Group permission not found', HttpStatus.NOT_FOUND);
-            }
-            user.groupPermission = groupPermission;
-        }
-
         // Xóa groupPermissionIds khỏi DTO để không bị save vào cột không tồn tại
-        const { groupPermissionId, ...rest } = updateUserDto;
+        const { ...rest } = updateUserDto;
 
         const updatedUser = await this.userRepository.save({ ...user, ...rest });
         if (!updatedUser) {

@@ -3,7 +3,6 @@
 import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToMany, JoinTable, ManyToOne } from "typeorm";
 import { Auth } from 'src/modules/backend/auth/entities/auth.entity';
 import { Video } from "src/modules/backend/video/entities/video.entity";
-import { GroupPermission } from "src/modules/backend/group-permission/entities/group-permission.entity";
 import { Playlists } from "src/modules/backend/playlists/entities/playlist.entity";
 
 @Entity()
@@ -41,11 +40,6 @@ export class User {
     @OneToOne(() => Auth, (auth) => auth.user, { cascade: true })
     @JoinColumn()
     auth: Auth;
-
-    // Mỗi user thuộc 1 nhóm
-    @ManyToOne(() => GroupPermission, group => group.users)
-    @JoinColumn()
-    groupPermission: GroupPermission;
 
     @OneToMany(() => Video, (video) => video.user)
     videos: Video[];

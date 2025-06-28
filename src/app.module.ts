@@ -37,12 +37,9 @@ import { backendRoutes, backendModules } from './routes/backend.routes';
 
 //guards
 import { AuthGuard } from './guards/auth/auth.guard';
-import { DatabaseTokenGuard } from './guards/auth/database-token.guard';
-import { RolesGuard } from 'src/guards/auth/roles.guard';
 import { SearchService } from './service/elasticsearch/search.service';
 import { CustomThrottlerGuard } from './guards/other/custom-throttler.guard';
 
-import { Token } from './modules/backend/token/entities/token.entity';
 import { ClientsModule } from '@nestjs/microservices';
 
 @Module({
@@ -83,7 +80,6 @@ import { ClientsModule } from '@nestjs/microservices';
         ...frontendModules,
         ...backendModules,
 
-        TypeOrmModule.forFeature([Token]),
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],
             useFactory: () => {
@@ -117,8 +113,6 @@ import { ClientsModule } from '@nestjs/microservices';
     providers: [
         { provide: APP_GUARD, useClass: CustomThrottlerGuard },  //giới hạn số lần gọi API
         { provide: APP_GUARD, useClass: AuthGuard }, // check token jwt
-        { provide: APP_GUARD, useClass: DatabaseTokenGuard }, // check token from database
-        { provide: APP_GUARD, useClass: RolesGuard }, // check quyền truy cập
         SearchService,
         SupabaseService, // kết nối supabase
     ]

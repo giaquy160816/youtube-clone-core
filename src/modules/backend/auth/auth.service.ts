@@ -69,7 +69,7 @@ export class AuthService {
         const { email, password } = loginDto;
         const auth = await this.authRepository.findOne({
             where: { email },
-            relations: ['user', 'user.groupPermission', 'user.groupPermission.permissions']
+            relations: ['user']
         });
         if (!auth) {
             throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
@@ -104,7 +104,7 @@ export class AuthService {
         const dataPayload = decryptPayload(decodeToken.data) as JwtDecryptedPayload;
         const auth = await this.authRepository.findOne({
             where: { email: dataPayload.email },
-            relations: ['user', 'user.groupPermission', 'user.groupPermission.permissions']
+            relations: ['user']
         });
         if (!auth) {
             throw new BadRequestException('Invalid refresh token');
@@ -152,7 +152,7 @@ export class AuthService {
             // Tìm user hoặc tạo mới
             const existingAuth = await this.authRepository.findOne({
                 where: { email },
-                relations: ['user', 'user.groupPermission', 'user.groupPermission.permissions']
+                relations: ['user']
             });
 
             if (existingAuth) {
@@ -189,7 +189,7 @@ export class AuthService {
                 });
                 const existingAuth = await this.authRepository.findOne({
                     where: { email },
-                    relations: ['user', 'user.groupPermission', 'user.groupPermission.permissions']
+                    relations: ['user']
                 });
                 if (existingAuth) {
                     return generateAuthResponse(this.jwtService, existingAuth);
