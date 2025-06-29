@@ -16,13 +16,6 @@ export class WatchedService {
     ) { }
 
     async create(userId: number, videoId: number) {
-        // check if video is already watched
-        const watchedExist = await this.watchedRepository.findOne({
-            where: { user_id: userId, video_id: videoId },
-        });
-        if (watchedExist) {
-            throw new HttpException('Video already watched', HttpStatus.BAD_REQUEST);
-        }
         // check video exist
         const videoExist = await this.videoRepository.findOne({
             where: { id: videoId },
@@ -31,13 +24,22 @@ export class WatchedService {
             throw new HttpException('Video not found', HttpStatus.NOT_FOUND);
         }
         try {
-            
-            const watched = this.watchedRepository.create({
-                user_id: userId,
-                video_id: videoId,
-                watched_at: new Date(),
+            // check if video is already watched
+            const watchedExist = await this.watchedRepository.findOne({
+                where: { user_id: userId, video_id: videoId },
             });
-            this.watchedRepository.save(watched);
+            if (watchedExist) {
+                const watched = {...watchedExist, watched_at: new Date() };
+                console.log('watchedExist', watched);
+                this.watchedRepository.save(watched);
+            }else{
+                const watched = this.watchedRepository.create({
+                    user_id: userId,
+                    video_id: videoId,
+                    watched_at: new Date(),
+                });
+                this.watchedRepository.save(watched);
+            }
             await this.redisService.set(`watched:${userId}:${videoId}`, '1', 60 * 60 * 24);
             return { message: 'Watched successfully' };
         } catch (error) {
