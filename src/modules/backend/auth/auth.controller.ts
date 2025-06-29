@@ -24,10 +24,9 @@ export class AuthController {
     })
     async refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
         const token = req.cookies['refresh_token'];
-        console.log('token', token);
         if (!token) throw new UnauthorizedException('Missing refresh token');
         const { accessToken, refreshToken, expiredAt, user } = await this.authService.refreshToken(token, req);
-
+        console.log('expiredAt', expiredAt);
         res.cookie('refresh_token', refreshToken, {
             httpOnly: true,
             secure: true, // nếu dùng HTTPS
@@ -102,7 +101,7 @@ export class AuthController {
             throw new UnauthorizedException('Login failed');
         }
         const { refreshToken, accessToken, expiredAt, user } = resLogin;
-        console.log(refreshToken);
+        console.log('expiredAt', expiredAt);
 
         res.cookie('refresh_token', refreshToken, {
             httpOnly: true,
