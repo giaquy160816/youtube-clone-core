@@ -68,10 +68,11 @@ export class SearchVideoService implements OnApplicationBootstrap {
     }
 
     async updateVideo(id: string, partialDoc: Partial<any>) {
-        return await this.searchService.update({
+        return this.searchService.update({
             index: this.indexEs,
-            id: id,
+            id,
             doc: partialDoc,
+            retry_on_conflict: 3,
         });
     }
 
@@ -223,12 +224,12 @@ export class SearchVideoService implements OnApplicationBootstrap {
             ]
         });
 
-        const total = typeof result.hits.total === 'number' 
-            ? result.hits.total 
+        const total = typeof result.hits.total === 'number'
+            ? result.hits.total
             : result.hits.total?.value || 0;
 
         const videos = result.hits.hits.map(hit => hit._source);
-        
+
         return {
             data: videos,
             total,

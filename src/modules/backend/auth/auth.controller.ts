@@ -24,6 +24,7 @@ export class AuthController {
     })
     async refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
         const token = req.cookies['refresh_token'];
+        console.log('token', token);
         if (!token) throw new UnauthorizedException('Missing refresh token');
         const { accessToken, refreshToken, expiredAt, user } = await this.authService.refreshToken(token, req);
 
@@ -31,7 +32,7 @@ export class AuthController {
             httpOnly: true,
             secure: true, // nếu dùng HTTPS
             sameSite: 'lax',
-            path: '/backend/auth/refresh-token',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
         });
         return {
@@ -66,7 +67,7 @@ export class AuthController {
             httpOnly: true,
             secure: true, // nếu dùng HTTPS
             sameSite: 'lax',
-            path: '/backend/auth/refresh-token',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
         });
 
@@ -100,12 +101,14 @@ export class AuthController {
         if (!resLogin) {
             throw new UnauthorizedException('Login failed');
         }
-        const { accessToken, expiredAt, user } = resLogin;
-        res.cookie('refresh_token', resLogin.refreshToken, {
+        const { refreshToken, accessToken, expiredAt, user } = resLogin;
+        console.log(refreshToken);
+
+        res.cookie('refresh_token', refreshToken, {
             httpOnly: true,
             secure: true, // nếu dùng HTTPS
             sameSite: 'lax',
-            path: '/backend/auth/refresh-token',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
         });
 
@@ -152,7 +155,7 @@ export class AuthController {
             httpOnly: true,
             secure: true,
             sameSite: 'lax',
-            path: '/backend/auth/refresh-token',
+            path: '/',
         });
 
         return { message: 'Logged out successfully' };
