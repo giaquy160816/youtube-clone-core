@@ -15,12 +15,12 @@ export const backendRoutes: Routes = [
     { path: 'backend/user', module: UserModule },
     { path: 'backend/auth', module: AuthModule },
     { path: 'backend/video', module: VideoModule },
-    { path: 'backend/setting', module: SettingModule },
     { path: 'backend/common', module: CommonModule },
     { path: 'backend/like', module: LikeModule },
     { path: 'backend/watched', module: WatchedModule },
     { path: 'backend/playlists', module: PlaylistsModule },
     { path: 'backend/playlist-video', module: PlaylistVideoModule },
+    { path: 'backend/setting', module: SettingModule },
 ];
 
 export const backendModules = [
@@ -28,10 +28,10 @@ export const backendModules = [
     UserModule,
     CommonModule,
     VideoModule,
-    SettingModule,
     AppScheduleModule,
     LikeModule,
     WatchedModule,
     PlaylistsModule,
     PlaylistVideoModule,
+    SettingModule,
 ];

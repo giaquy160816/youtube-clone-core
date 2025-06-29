@@ -29,7 +29,8 @@ export class IpWhitelistMiddleware implements NestMiddleware {
             const whitelist = allowIpSetting.value
                 .split(',')
                 .map((ip) => ip.trim());
-
+            console.log('whitelist', whitelist);
+            console.log('ip', ip);
             if (!whitelist.includes(ip)) {
                 // await sendErrorEmail('IP bị chặn', `IP ${ip} bị từ chối truy cập vào hệ thống tại ${new Date().toISOString()}`); // Nếu muôn gửi mail lỗi thì bật lên
 
