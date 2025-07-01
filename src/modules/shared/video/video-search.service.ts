@@ -133,13 +133,13 @@ export class SearchVideoService implements OnApplicationBootstrap {
             };
 
         // Nếu là số và có query → thêm điều kiện match theo ID
-        if (q && isNumber) {
-            query.bool.should.push({
-                term: {
-                    id: parseInt(q),
-                },
-            });
-        }
+        // if (q && isNumber) {
+        //     query.bool.should.push({
+        //         term: {
+        //             id: parseInt(q),
+        //         },
+        //     });
+        // }
 
         const result = await this.searchService.search({
             index: 'videos',
